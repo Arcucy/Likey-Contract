@@ -1,0 +1,18 @@
+{
+  "name": "growth-contract",
+  "version": "1.0.0",
+  "description": "SmartWeave Contract for Growth Platform",
+  "main": "index.js",
+  "author": "Ayaka Neko <neko@ayaka.moe>",
+  "license": "MIT",
+  "dependencies": {
+    "smartweave": "^0.4.27",
+    "testweave-sdk": "https://arweave.net/QlYhKT7P4g01WN27LoqMCfp_AgEG5RTvLycVhbOIWIs"
+  },
+  "devDependencies": {
+    "eslint": "^7.21.0"
+  },
+  "scripts": {
+    "sdk": "node sdk.js" 
+  }
+}
