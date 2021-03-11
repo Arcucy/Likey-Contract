@@ -5,7 +5,7 @@ const process = require('process')
 const Axios = require('axios')
 const Arweave = require('arweave')
 const TestWeave = require('testweave-sdk').default
-const SmartWeave = require('smartweave')
+// const SmartWeave = require('smartweave')
 
 const arweave = Arweave.init({
     host: 'pool.arcucy.io',
