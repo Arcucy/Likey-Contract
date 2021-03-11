@@ -84,36 +84,36 @@ async function avatar(avatarPath, keyPath) {
 
         const image = Buffer.from(fs.readFileSync(path.resolve(avatarPath)))
         const key = JSON.parse(Buffer.from(fs.readFileSync(path.resolve(keyPath))).toString())
+        console.log(image)
+        // const addr = await arweave.wallets.getAddress(key)
+        // const winston = await getUploadPrice(image.byteLength)
+        // console.log('total cost: ', winston)
+        // await testWeave.drop(addr, String(parseInt(winston) * 1.2))
+        // await testWeave.mine()
+        // const newBalance = await arweave.wallets.getBalance(addr)
+        // console.log('balance updated: ', newBalance)
 
-        const addr = await arweave.wallets.getAddress(key)
-        const winston = await getUploadPrice(image.byteLength)
-        console.log('total cost: ', winston)
-        await testWeave.drop(addr, String(parseInt(winston) * 1.2))
-        await testWeave.mine()
-        const newBalance = await arweave.wallets.getBalance(addr)
-        console.log('balance updated: ', newBalance)
+        // const imageTx = await arweave.createTransaction({ data: image.toString('base64') }, key)
+        // imageTx.addTag('Content-Type', getType[ext])
+        // imageTx.addTag('App-Name', 'arweaveavatar')
+        // imageTx.addTag('Unix-Time', String(Date.now()))
+        // imageTx.addTag('Type', 'avatar')
 
-        const imageTx = await arweave.createTransaction({ data: image.toString('base64') }, key)
-        imageTx.addTag('Content-Type', getType[ext])
-        imageTx.addTag('App-Name', 'arweaveavatar')
-        imageTx.addTag('Unix-Time', String(Date.now()))
-        imageTx.addTag('Type', 'avatar')
+        // await arweave.transactions.sign(imageTx, key)
+        // const imgUploader = await arweave.transactions.getUploader(imageTx)
 
-        await arweave.transactions.sign(imageTx, key)
-        const imgUploader = await arweave.transactions.getUploader(imageTx)
+        // while (!imgUploader.isComplete) {
+        //     await imgUploader.uploadChunk()
+        //     console.log('Uploading: ', imgUploader.pctComplete)
+        // }
+        // let status = await arweave.transactions.getStatus(imageTx.id)
+        // console.log(status)
 
-        while (!imgUploader.isComplete) {
-            await imgUploader.uploadChunk()
-            console.log('Uploading: ', imgUploader.pctComplete)
-        }
-        let status = await arweave.transactions.getStatus(imageTx.id)
-        console.log(status)
-
-        await arweave.transactions.post(imageTx)
-        status = await arweave.transactions.getStatus(imageTx.id)
-        console.log(status)
-        await testWeave.mine()
-        console.log(imageTx.id)
+        // await arweave.transactions.post(imageTx)
+        // status = await arweave.transactions.getStatus(imageTx.id)
+        // console.log(status)
+        // await testWeave.mine()
+        // console.log(imageTx.id)
     } catch (e) {
         console.error(e)
         return 1
@@ -168,6 +168,8 @@ function deploy() {
             'create [--key-file]                                     - 创建合同并使用钱包JWK密钥进行部署\n' +
             'write [CONTRACT_ID] [--input] [--tag] [--keyfile]       - 使用钱包 JWK 密钥交互合约并写入，参数有「输入 --input」和可选「标签 --tags = [{name:"",value:""}]」\n' +
             'read [CONTRACT_ID] [--input] [--tag]                    - 读取合约状态，如果指定了 --input 和可选参数 --tag，则使用交互读取并发送到合约来读取互动后的合约状态\n' +
+            'id [username] [--key-file]                              - 更新新的 Arweave ID\n' +
+            'avatar [图片] [--key-file]                              - 更新新的 Arweave Avatar 头像\n' +
             'version                                                 - 显示 Growth 合约开发工具包\n'
             )
         }
