@@ -1,0 +1,10 @@
+{
+    "admins": ["$ADMIN"],
+    "owner": "$OWNER",
+    "creators": {},
+    "projects": {},
+    "schema": {
+        "categories": [],
+        "types": []
+    }
+}
