@@ -9,6 +9,7 @@
     "smartweave": "^0.4.27",
     "testweave-sdk": "https://arweave.net/QlYhKT7P4g01WN27LoqMCfp_AgEG5RTvLycVhbOIWIs"
   },
+  "type": "module",
   "devDependencies": {
     "eslint": "^7.21.0"
   },
