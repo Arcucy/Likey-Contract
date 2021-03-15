@@ -153,11 +153,10 @@ class Creator {
     }
 
     static verifyData(state, data) {
-        const creators = state.creators
         const example = {
-            type: '', shortname: '', intro: '', categories: [''], target: '',
+            type: '', shortname: '', intro: '', categories: [''],
             ticker: { ticker: '', name: '', contract: '' },
-            items: [ { title: "", value: 0, description: "" } ]
+            items: [ { title: "", value: '0', description: "" } ]
         }
 
         if (!Utils.compareKeys(example, data)) {
@@ -165,15 +164,11 @@ class Creator {
         }
 
         for (const [key, value] of Object.entries(data)) {
-            if (key === 'type' || key === 'shortname' || key === 'intro' || key === 'target') {
+            if (key === 'type' || key === 'shortname' || key === 'intro') {
                 if (typeof(value) !== 'string') {
                     throw new ContractError(`verifyData#: Invalid key "${key}" with value "${value}", value should be string`)
                 }
             }
-        }
-
-        if (!Utils.isAddress(String(data.target))) {
-            throw new ContractError(`verifyData#: Target is not a address`)
         }
 
         if (state.schema.types.indexOf(String(data.type)) === -1) {
@@ -213,37 +208,54 @@ class Creator {
         }
     }
 
-    static verifyItems(data) {
+    static verifyItems(data, hasId) {
         const exampleItem = {
             title: "",
-            value: 10,
+            value: '10',
             description: ""
+        }
+
+        if (hasId) {
+            Object.defineProperty(exampleItem, 'id', {
+                value: 0,
+                writable: true,
+                enumerable: true
+            })
         }
 
         if (Array.isArray(data.items) && data.items.length > 0) {
             for (let i = 0; i < data.items.length; i++) {
                 const e = data.items[i]
                 if (!Utils.compareKeys(exampleItem, e)) {
-                    throw new ContractError(`verifyData#: Data.Items items[${i}] input is invalid`)
+                    throw new ContractError(`verifyItems#: Data.Items items[${i}] input is invalid`)
                 }
 
                 for (const [key, value] of Object.entries(e)) {
-                    if (key === 'title' || key === 'description') {
+                    if (key === 'title' || key === 'description' || key === 'value') {
                         if (typeof(value) !== 'string') {
-                            throw new ContractError(`verifyData#: Invalid items[${i}] key "${key}" with value "${value}", value should be string`)
+                            throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be string`)
                         }
                     }
 
-                    if (key === 'value' && !Number.isInteger(value)) {
-                        throw new ContractError(`verifyData#: Invalid items[${i}] key "${key}" with value "${value}", value should be integer`)
+                    if (hasId && key === 'id' && !Number.isInteger(value)) {
+                        throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be integer`)
                     }
                 }
             }
         }
     }
 
-    static announceCreator(state, data) {
-        if (Creator.isCreator(state.creators, data.target)) {
+    /**
+     * announceCreator announce a creator and adds the creator data into contract
+     * @param {*} state         - contract state
+     * @param {*} data          - creator data
+     * @returns state
+     */
+    static announceCreator(state, target, data) {
+        if (!Utils.isAddress(String(target))) {
+            throw new ContractError(`announceCreator#: Target is not a address`)
+        }
+        if (Creator.isCreator(state.creators, target)) {
             throw new ContractError('announceCreator#: Target is already creator')
         }
         try {
@@ -257,6 +269,9 @@ class Creator {
         this.verifyData(state, data)
         this.verifyItems(data)
 
+        if (data.items.length > Number.MAX_VALUE - 100) {
+            throw new ContractError(`announceCreator#: The number of yours total items has reached the limitation of MAX_VALUE`)
+        }
         if (data.items.length > 0) {
             const items = [...data.items]
             for (let i = 0; i < items.length; i++) {
@@ -265,8 +280,21 @@ class Creator {
             data.items = items
         }
 
-        const target = data.target
-        delete data.target
+        Object.defineProperty(data.ticker, 'balances', {
+            value: [],
+            writable: true,
+            enumerable: true
+        })
+        Object.defineProperty(data.ticker, 'holders', {
+            value: '0',
+            writable: true,
+            enumerable: true
+        })
+        Object.defineProperty(data.ticker, 'totalSupply', {
+            value: '0',
+            writable: true,
+            enumerable: true
+        })
 
         Object.defineProperty(state.creators, target, {
             value: data,
@@ -277,52 +305,116 @@ class Creator {
         return state
     }
 
-    static removeCreator(state, caller, target) {
-        if (!(Ownable.isOwner(state.owner, caller) || Admin.isAdmin(state.admins, caller))) {
-            throw new ContractError('removeCreator#: Caller is not a owner or admin to this contract')
+    /**
+     * addItem adds a set of selling solution items to state
+     * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
+     * @param {*} target        - editing target
+     * @param {*} data          - the data would be injected
+     * @return state
+     */
+    static addItem(state, caller, target, data) {
+        if (!Creator.isCreator(state.creators, target)) {
+            throw new ContractError('addItemToCreator#: Target is not a creator')
+        }
+        if (!(target === caller || Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('addItemToCreator#: Caller is not the creator of its own or admin/owner')
+        }
+        try {
+            if (typeof(data) !== 'object') {
+                data = JSON.parse(data)
+            }
+        } catch (e) {
+            throw new ContractError(`addItemToCreator#: Data is not a valid JSON or Object ,${e.message}`)
         }
 
-        if (!this.isCreator(state.creators, target)) {
-            throw new ContractError(`removeCreator#: Target ${target} is not a creator`)
+        if (data.items.length === 0) {
+            throw new ContractError(`addItemToCreator#: Data.Items should not be empty`)
         }
+        this.verifyItems(data)
 
-        state.creators[target] = null
-        const creators = { ...state.creators }
-        delete creators[target]
-        state.creators = creators
-
-        if (state.projects.hasOwnProperty(target)) {
-            const projects = { ...state.projects }
-            delete projects[target]
-            state.projects = projects
+        const items = [...state.creators[target].items, ...data.items]
+        if (items.length > Number.MAX_VALUE - 100) {
+            throw new ContractError(`addItemToCreator#: The number of yours total items has reached the limitation of MAX_VALUE`)
         }
+        for (let i = 0; i < items.length; i++) {
+            items[i]['id'] = i
+        }
+        state.creators[target].items = items
 
         return state
     }
 
-    static addItem(state, caller, target, data) {
-        if (Creator.isCreator(state.creators, data.target)) {
-            throw new ContractError('announceCreator#: Target is already creator')
+    /**
+     * removeItem removes a set of selling solution items from state
+     * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
+     * @param {*} target        - editing target
+     * @param {*} indexes       - the indexes of the items would be removed
+     * @return state
+     */
+    static removeItem(state, caller, target, indexes) {
+        if (!Creator.isCreator(state.creators, target)) {
+            throw new ContractError('removeItemFromCreator#: Target is not a creator')
         }
-        try {
-            if (typeof(data) !== 'object') {
-                data = JSON.parse(data)
-            }
-        } catch (e) {
-            throw new ContractError(`announceCreator#: Data is not a valid JSON or Object ,${e.message}`)
+        if (!(target === caller || Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('removeItemFromCreator#: Caller is not the creator of its own or admin/owner')
         }
+        if (!(Array.isArray(indexes) && indexes.length > 0)) {
+            throw new ContractError(`removeItemFromCreator#: Indexes is not a valid Array or Empty`)
+        }
+
+        const newItems = state.creators[target].items.filter(e => {
+            if (indexes.indexOf(e.id) === -1) return e
+        })
+        state.creators[target].items = newItems
+
+        return state
     }
 
-    static removeItem(state, caller, target, index) {
-        if (Creator.isCreator(state.creators, data.target)) {
-            throw new ContractError('announceCreator#: Target is already creator')
+    static editItem(state, caller, target, data) {
+        if (!Creator.isCreator(state.creators, target)) {
+            throw new ContractError('removeItemFromCreator#: Target is not a creator')
+        }
+        if (!(target === caller || Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('removeItemFromCreator#: Caller is not the creator of its own or admin/owner')
         }
         try {
             if (typeof(data) !== 'object') {
                 data = JSON.parse(data)
             }
         } catch (e) {
-            throw new ContractError(`announceCreator#: Data is not a valid JSON or Object ,${e.message}`)
+            throw new ContractError(`addItemToCreator#: Data is not a valid JSON or Object ,${e.message}`)
+        }
+        if (data.items.length === 0) {
+            throw new ContractError(`addItemToCreator#: Data.Items should not be empty`)
+    }
+        this.verifyItems(data, true)
+
+        const editItems = {}
+        data.items.forEach(e => {
+            Object.defineProperty(editItems, String(e.id), {
+                value: {
+                    title: e.title,
+                    value: e.value,
+                    description: e.description
+                },
+                writable: true,
+                enumerable: true
+            })
+        })
+        const temp = [...state.creators[target].items]
+        temp.forEach((e, index) => {
+            if (Object.keys(editItems).indexOf(String(e.id)) !== -1) {
+                const pending = editItems[String(e.id)]
+                temp[index].title = pending.title
+                temp[index].value = pending.value
+                temp[index].description = pending.description
+        }
+        })
+        state.creators[target].items = temp
+        return state
+            }
         }
     }
 
@@ -393,17 +485,7 @@ export function handle(state, action) {
      * @param {String|Object|any} data creator object
      */
     if (input.function === 'announceCreator') {
-        const res = Creator.announceCreator(state, input.data)
-        return { state: res }
-    }
-
-    // removeCreator contract_function
-    /**
-     * @param {String} function removeCreator
-     * @param {String} target address
-     */
-    if (input.function === 'removeCreator') {
-        const res = Creator.removeCreator(state, caller, input.target)
+        const res = Creator.announceCreator(state, input.target, input.data)
         return { state: res }
     }
 
@@ -423,7 +505,7 @@ export function handle(state, action) {
      * @param {String} title
      */
     if (input.function === 'removeItemFromCreator') {
-        const res = Creator.removeItem(state, caller, input.target, input.index)
+        const res = Creator.removeItem(state, caller, input.target, input.indexes)
         return { state: res }
     }
 
@@ -433,7 +515,17 @@ export function handle(state, action) {
      * @param {String|Object|any}
      */
     if (input.function === 'editItemsToCreator') {
-        const res = Creator.editItem(state, caller, input.target, input.index)
+        const res = Creator.editItem(state, caller, input.target, input.data)
+        return { state: res }
+    }
+
+    if (input.function === 'mintForCreator') {
+        const res = Ticker.mintForCreator(state, caller, input.recipient, input.data)
+        return { state: res }
+    }
+
+    if (input.function === 'burnForCreator') {
+        const res = Ticker.burnForCreator(state, caller, input.target, input.data)
         return { state: res }
     }
 
