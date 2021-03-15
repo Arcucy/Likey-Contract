@@ -1,10 +1,9 @@
 {
-    "admins": ["$ADMIN"],
-    "owner": "$OWNER",
+    "admins": ["A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"],
+    "owner": "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0",
     "creators": {},
-    "projects": {},
     "schema": {
-        "categories": [],
-        "types": []
+        "categories": ["Type1", "Type2", "Type3", "Type4", "Type5"],
+        "types": ["Personal", "Team", "Enterprise"]
     }
 }

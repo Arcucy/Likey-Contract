@@ -1,7 +1,8 @@
-// growth project
+/**
+ * Arcucy Team
+ * Project LIKEY
+ */
 
-// const CONTRACT_NAME = 'growth-contract-dev'
-// const VERSION = '0.0.1'
 const ContractError = Error
 
 class Ownable {
@@ -142,16 +143,6 @@ class Creator {
         return creators.hasOwnProperty(address)
     }
 
-    static hasPST(creators, address) {
-        if (creators[address].hasOwnProperty('creator')) {
-            if (creators[address].hasOwnProperty('ticker') &&
-                creators[address].hasOwnProperty('ticker-contract')) {
-                    return true
-            }
-        }
-        return false
-    }
-
     static verifyData(state, data) {
         const example = {
             type: '', shortname: '', intro: '', categories: [''],
@@ -236,7 +227,7 @@ class Creator {
                             throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be string`)
                         }
                     }
-
+                    
                     if (hasId && key === 'id' && !Number.isInteger(value)) {
                         throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be integer`)
                     }
@@ -280,22 +271,6 @@ class Creator {
             data.items = items
         }
 
-        Object.defineProperty(data.ticker, 'balances', {
-            value: [],
-            writable: true,
-            enumerable: true
-        })
-        Object.defineProperty(data.ticker, 'holders', {
-            value: '0',
-            writable: true,
-            enumerable: true
-        })
-        Object.defineProperty(data.ticker, 'totalSupply', {
-            value: '0',
-            writable: true,
-            enumerable: true
-        })
-
         Object.defineProperty(state.creators, target, {
             value: data,
             writable: true,
@@ -332,7 +307,7 @@ class Creator {
             throw new ContractError(`addItemToCreator#: Data.Items should not be empty`)
         }
         this.verifyItems(data)
-
+        
         const items = [...state.creators[target].items, ...data.items]
         if (items.length > Number.MAX_VALUE - 100) {
             throw new ContractError(`addItemToCreator#: The number of yours total items has reached the limitation of MAX_VALUE`)
@@ -388,9 +363,9 @@ class Creator {
         }
         if (data.items.length === 0) {
             throw new ContractError(`addItemToCreator#: Data.Items should not be empty`)
-    }
+        }
         this.verifyItems(data, true)
-
+        
         const editItems = {}
         data.items.forEach(e => {
             Object.defineProperty(editItems, String(e.id), {
@@ -410,16 +385,10 @@ class Creator {
                 temp[index].title = pending.title
                 temp[index].value = pending.value
                 temp[index].description = pending.description
-        }
+            }
         })
         state.creators[target].items = temp
         return state
-            }
-        }
-    }
-
-    static editItem(state, caller, target, data) {
-
     }
 }
 
@@ -516,16 +485,6 @@ export function handle(state, action) {
      */
     if (input.function === 'editItemsToCreator') {
         const res = Creator.editItem(state, caller, input.target, input.data)
-        return { state: res }
-    }
-
-    if (input.function === 'mintForCreator') {
-        const res = Ticker.mintForCreator(state, caller, input.recipient, input.data)
-        return { state: res }
-    }
-
-    if (input.function === 'burnForCreator') {
-        const res = Ticker.burnForCreator(state, caller, input.target, input.data)
         return { state: res }
     }
 
