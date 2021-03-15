@@ -1,49 +1,15 @@
-import fs, { stat } from 'fs'
-import path from 'path'
-import { handle } from '../contracts/likey-contract.js'
+// import fs, { stat } from 'fs'
+// import path from 'path'
+// import { handle } from '../contracts/likey-contract.js'
 
-const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
+// const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
 
-const state = {
-    ...initState
-}
-
-state.owner = 'RBuiQvzC6dI-ZMaeha4Y387grwOz73yp73OmqWgqtEQ'
+// const state = {
+//     ...initState
+// }
 
 let action
 let res
-
-action = {
-    input: { 
-        function: 'announceCreator',
-        target: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
-        data: {
-            type: 'Personal',
-            shortname: 'xxx',
-            intro: '[0-40]',
-            categories: ['Type1', 'Type2'],
-            ticker: {
-                ticker: 'ANC',
-                name: 'Ayaka Neko Coin',
-                contract: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
-            },
-            items: [
-                {
-                    title: "我是第零位",
-                    value: '10',
-                    description: "将被改变的数据"
-                },
-                {
-                    title: "Example Title",
-                    value: '10',
-                    description: "Example Description"
-                }
-            ]
-        }
-    }, 
-    caller: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0'
-}
-res = handle(state, action)
 
 const user = {
     type: '',
@@ -84,13 +50,6 @@ const expected = {
                 name: 'TICKER',
                 ticker: 'TIC',
                 contract: 'ADDR',
-                // 持仓人数
-                balances: {
-                    "A": '10',
-                    "B": '10',
-                },
-                holders: 2,
-                totalSupply: '20'
             },
             items: [
                 {
@@ -100,6 +59,58 @@ const expected = {
                     description: ''
                 }
             ]
+        }
+    }
+}
+
+const isOwner = {
+    function: 'isOwner',
+    address: 'ADDR'
+}
+
+const isAdmin = {
+    function: 'isAdmin',
+    address: 'ADDR'
+}
+
+const shortNameExistInput = {
+    function: 'shortNameExist',
+    shortname: 'ayakaneko'
+}
+
+const addAdminInput = {
+    function: 'addAdmin',
+    target: 'ADDR'
+}
+
+const removeAdminInput = {
+    function: 'removeAdmin',
+    target: 'ADDR'
+}
+
+const transferOwnershipInput = {
+    function: 'transferOwnership',
+    target: 'ADDR'
+}
+
+const updateTypeInput = {
+    input: {
+        function: 'updateType',
+        data: {
+            updateTypes: {
+                add: ['a', 'b'],
+                remove: ['a']
+            }
+        }
+    }
+}
+
+const updateCategoryInput = {
+    function: 'updateCategory',
+    data: {
+        update: {
+            add: ['a', 'b'],
+            remove: ['a']
         }
     }
 }
@@ -150,7 +161,7 @@ const removeItemFromCreatorInput = {
 
 const editItemsToCreatorInput = {
     function: 'editItemsToCreator',
-    target: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+    target: 'ADDR',
     data: {
         items: [
             {
@@ -165,27 +176,27 @@ const editItemsToCreatorInput = {
 
 const mintForCreatorInput = {
     function: 'mintForCreator',
-    recipient: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+    recipient: 'ADDR',
     data: {
-        tickerCreator: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+        tickerCreator: 'ADDR',
         quantity: '10'
     }
 }
 
 const burnForCreatorInput = {
     function: 'burnForCreator',
-    target: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+    target: 'ADDR',
     data: {
-        tickerCreator: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+        tickerCreator: 'ADDR',
         quantity: '3'
     }
 }
 
 const sponsorAddedForCreatorInput = {
     function: 'sponsorAddedForCreator',
-    sponsor: 'RBuiQvzC6dI-ZMaeha4Y387grwOz73yp73OmqWgqtEQ',
+    sponsor: 'ADDR',
     data: {
-        tickerCreator: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+        tickerCreator: 'ADDR',
         quantity: ''
     }
 }

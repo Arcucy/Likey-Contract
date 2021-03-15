@@ -1,9 +1,13 @@
 /**
- * Arcucy Team
- * Project LIKEY
+ * Likey Contract
+ * Version: 1.0.0
+ * 
+ * Copyright ©️ Arcucy.io
+ * 
+ * Author: Arcucy Team <i@arcucy.io>
+ * Assosiated With: Project LIKEY
+ * Source: https://github.com/AyakaLab/Growth-Contract
  */
-
-const ContractError = Error
 
 class Ownable {
     /**
@@ -23,11 +27,12 @@ class Ownable {
      * @param {*} target
      */
     static transferOwnership(state, caller, target) {
+        console.log(state, caller, target)
         if (!Ownable.isOwner(state.owner, caller)) {
             throw new ContractError('transferOwnership#: Caller is not the owner of this contract')
         }
 
-        if (!Utils.isAddress(input.target)) {
+        if (!Utils.isAddress(target)) {
             throw new ContractError('transferOwnership#: Target is not a valid address')
         }
 
@@ -66,7 +71,7 @@ class Admin {
             throw new ContractError('addAdmin#: Caller is not the owner of this contract')
         }
 
-        if (!Utils.isAddress(input.target)) {
+        if (!Utils.isAddress(target)) {
             throw new ContractError('addAdmin#: Target is not a valid address')
         }
         
@@ -88,7 +93,7 @@ class Admin {
             throw new ContractError('removeAdmin#: Caller is not the owner of this contract')
         }
 
-        if (!Utils.isAddress(input.target)) {
+        if (!Utils.isAddress(target)) {
             throw new ContractError('removeAdmin#: Target is not a valid address')
         }
 
@@ -347,6 +352,14 @@ class Creator {
         return state
     }
 
+    /**
+     * editItem will override the items
+     * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
+     * @param {*} target        - editing target
+     * @param {*} data          - the data would be updated
+     * @returns 
+     */
     static editItem(state, caller, target, data) {
         if (!Creator.isCreator(state.creators, target)) {
             throw new ContractError('removeItemFromCreator#: Target is not a creator')
@@ -392,12 +405,98 @@ class Creator {
     }
 }
 
+class Likey {
+    /**
+     * addType will add a new set of types into type attribute
+     * @param {*} state                 - contract state
+     * @param {*} caller                - contract caller
+     * @param {*} updateTypes           - the types would be updated
+     */
+    static updateType(state, caller, updateTypes) {
+        if (!(Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('updateType#: Caller is not an admin or owner to this contract')
+        }
+
+        const exampleUpdateTypes = {
+            add: [],
+            remove: []
+        }
+
+        if (!Utils.compareKeys(exampleUpdateTypes, updateTypes)) {
+            throw new ContractError('updateType#: Data.UpdateTypes input is invalid')
+        }
+        for (const v of Object.values(updateTypes)) {
+            if (!Array.isArray(v)) {
+                throw new ContractError(`updateType#: Data.UpdateTypes ${v} should be an array`)
+            }
+        }
+
+        if (updateTypes.add.length === 0 && updateTypes.remove.length === 0) {
+            throw new ContractError(`updateType#: Data.UpdateTypes add and remove input should not be empty for both`)
+        }
+
+        const temp = [...state.schema.types]
+        const updateRemove = temp.filter(e => updateTypes.remove.indexOf(e) === -1)
+        const unique = new Set()
+
+        const updated = [...updateTypes.add, ...updateRemove]
+        updated.forEach(e => unique.add(e))
+        const final = []
+        unique.forEach(e => { final.push(e) })
+        state.schema.types = final
+
+        return state
+    }
+
+    /**
+     * addType will add a new set of types into type attribute
+     * @param {*} state                     - contract state
+     * @param {*} caller                    - contract caller
+     * @param {*} updateCategories          - the categories would be updated
+     */
+     static updateCategory(state, caller, updateCategories) {
+        if (!(Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('updateCategory#: Caller is not an admin or owner to this contract')
+        }
+
+        const exampleUpdateCategories = {
+            add: [],
+            remove: []
+        }
+
+        if (!Utils.compareKeys(exampleUpdateCategories, updateCategories)) {
+            throw new ContractError('updateCategory#: Data.UpdateCategories input is invalid')
+        }
+        for (const v of Object.values(updateCategories)) {
+            if (!Array.isArray(v)) {
+                throw new ContractError(`updateCategory#: Data.UpdateCategories ${v} should be an array`)
+            }
+        }
+
+        if (updateCategories.add.length === 0 && updateCategories.remove.length === 0) {
+            throw new ContractError(`updateCategory#: Data.UpdateCategories add and remove input should not be empty for both`)
+        }
+
+        const temp = [...state.schema.categories]
+        const updateRemove = temp.filter(e => updateCategories.remove.indexOf(e) === -1)
+        const unique = new Set()
+
+        const updated = [...updateCategories.add, ...updateRemove]
+        updated.forEach(e => unique.add(e))
+        const final = []
+        unique.forEach(e => { final.push(e) })
+        state.schema.categories = final
+
+        return state
+    }
+}
+
 export function handle(state, action) {
     const input = action.input
     const caller = action.caller
 
     // Read
-    // isOwner contract_function
+    // isOwner read_contract_function
     /**
      * @param {String} function isOwner
      * @param {String} address address
@@ -407,7 +506,7 @@ export function handle(state, action) {
         return { result: res }
     }
 
-    // isOwner contract_function
+    // isOwner read_contract_function
     /**
      * @param {String} function isAdmin
      * @param {String} address address
@@ -417,8 +516,21 @@ export function handle(state, action) {
         return { result: res }
     }
 
+    // shortNameExist read_contract_function
+    /**
+     * @param {String} function shortNameExist
+     * @param {String} shortname name
+     */
+    if (input.function === 'shortNameExist') {
+        const shortnames = []
+        for (const e of Object.values(state.creators)) {
+            shortnames.push(e.shortname)
+        }
+        return { result: shortnames.indexOf(input.shortname) !== -1 }
+    }
+
     // Write
-    // addAdmin contract_function
+    // addAdmin write_contract_function
     /**
      * @param {String} function addAdmin
      * @param {String} target address
@@ -428,7 +540,7 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // removeAdmin contract_function
+    // removeAdmin write_contract_function
     /**
      * @param {String} function removeAdmin
      * @param {String} target address
@@ -438,7 +550,7 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // transferOwnership contract_function
+    // transferOwnership write_contract_function
     /**
      * @param {String} function transferOwnership
      * @param {String} target address
@@ -447,8 +559,28 @@ export function handle(state, action) {
         const res = Ownable.transferOwnership(state, caller, input.target)
         return { state: res }
     }
+
+    // updateType write_contract_function
+    /**
+     * @param {String} function updateType
+     * @param {String} data update types data
+     */
+    if (input.function === 'updateType') {
+        const res = Likey.updateType(state, caller, input.data.updateTypes)
+        return { state: res }
+    }
+
+    // updateCategory write_contract_function
+    /**
+     * @param {String} function updateCategory
+     * @param {String} data update categories data
+     */
+    if (input.function === 'updateCategory') {
+        const res = Likey.updateCategory(state, caller, input.data.updateCategories)
+        return { state: res }
+    }
     
-    // announceCreator contract_function
+    // announceCreator write_contract_function
     /**
      * @param {String} function announceCreator
      * @param {String|Object|any} data creator object
@@ -458,7 +590,7 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // addItemToCreator contract_function
+    // addItemToCreator write_contract_function
     /**
      * @param {String} function addItemToCreator
      * @param {String|Object|any} data item object
@@ -468,7 +600,7 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // removeItemFromCreator contract_function
+    // removeItemFromCreator write_contract_function
     /**
      * @param {String} function removeItemFromCreator
      * @param {String} title
@@ -478,7 +610,7 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // editItemsToCreator contract_function
+    // editItemsToCreator write_contract_function
     /**
      * @param {String} function editItemsToCreator
      * @param {String|Object|any}
