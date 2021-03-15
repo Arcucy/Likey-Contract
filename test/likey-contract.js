@@ -109,20 +109,79 @@ const expected = {
                 contract: 'ADDR',
                 // 持仓人数
                 balances: {
-                    "A": 10,
-                    "B": 10,
+                    "A": '10',
+                    "B": '10',
                 },
                 holders: 2,
-                totalSupply: 20
+                totalSupply: '20'
             },
             items: [
                 {
                     title: 'Example Title',
                     /** 必须换算为最小小数点 */
-                    value: 10,
+                    value: '10',
                     description: ''
                 }
             ]
         }
+    }
+}
+
+const announceCreatorInput = {
+    function: 'announceCreator',
+    target: 'ADDRESS',
+    data: {
+        type: 'Personal',
+        shortname: 'xxx',
+        intro: 'xxx',
+        categories: ['1', '2'],
+        ticker: {
+            ticker: 'EXA',
+            name: 'Example Name',
+            contract: 'ADDRESS',
+            },
+            items: [
+                {
+                title: "Example Title",
+                value: '10',
+                description: "Example Description"
+            }
+        ]
+    }
+}
+
+const addItemToCreatorInput = {
+    function: 'addItemToCreator',
+    target: 'ADDRESS',
+    data: {
+        items: [
+            {
+                    title: 'Example Title',
+                    /** 必须换算为最小小数点 */
+                value: '10',
+                    description: ''
+                }
+            ]
+        }
+    }
+
+const removeItemFromCreatorInput = {
+    function: 'removeItemFromCreator',
+    target: 'ADDRESS',
+    indexes: [1]
+}
+
+const editItemsToCreatorInput = {
+    function: 'editItemsToCreator',
+    target: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+    data: {
+        items: [
+            {
+                id: 0,
+                title: "我是第零位",
+                value: '10',
+                description: "改变之后"
+            }
+        ]
     }
 }
