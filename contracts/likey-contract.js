@@ -653,32 +653,32 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // addItemToCreator write_contract_function
+    // addItem write_contract_function
     /**
-     * @param {String} function addItemToCreator
+     * @param {String} function addItem
      * @param {String|Object|any} data item object
      */
-    if (input.function === 'addItemToCreator') {
+    if (input.function === 'addItem') {
         const res = Creator.addItem(state, caller, input.target, input.data)
         return { state: res }
     }
 
-    // removeItemFromCreator write_contract_function
+    // removeItem write_contract_function
     /**
-     * @param {String} function removeItemFromCreator
+     * @param {String} function removeItem
      * @param {String} title
      */
-    if (input.function === 'removeItemFromCreator') {
+    if (input.function === 'removeItem') {
         const res = Creator.removeItem(state, caller, input.target, input.indexes)
         return { state: res }
     }
 
-    // editItemsToCreator write_contract_function
+    // editItem write_contract_function
     /**
-     * @param {String} function editItemsToCreator
+     * @param {String} function editItem
      * @param {String|Object|any}
      */
-    if (input.function === 'editItemsToCreator') {
+    if (input.function === 'editItem') {
         const res = Creator.editItem(state, caller, input.target, input.data)
         return { state: res }
     }
