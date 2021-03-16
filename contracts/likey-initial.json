@@ -4,7 +4,7 @@
     "creators": {},
     "schema": {
         "categories": ["Type1", "Type2", "Type3", "Type4", "Type5"],
-        "types": ["Personal", "Team", "Enterprise"]
+        "scales": ["Personal", "Team", "Enterprise"]
     },
     "version": "1.0.0"
 }

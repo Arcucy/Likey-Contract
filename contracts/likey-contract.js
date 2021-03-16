@@ -9,6 +9,8 @@
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
 
+const ContractError = Error
+
 class Ownable {
     /**
      * isOwner checks whether the address is the owner of this contract
@@ -115,7 +117,7 @@ class Utils {
         if (typeof(address) !== 'string') {
             throw new ContractError('isAddress#: Address is not string')
         }
-        return /^([a-zA-Z0-9]|_|-)+$/.test(address)
+        return /^([a-zA-Z0-9]|_|-){43}$/.test(address)
     }
 
     /**
@@ -150,7 +152,7 @@ class Creator {
 
     static verifyData(state, data) {
         const example = {
-            type: '', shortname: '', intro: '', categories: [''],
+            scale: '', shortname: '', intro: '', category: '',
             ticker: { ticker: '', name: '', contract: '' },
             items: [ { title: "", value: '0', description: "" } ]
         }
@@ -160,18 +162,18 @@ class Creator {
         }
 
         for (const [key, value] of Object.entries(data)) {
-            if (key === 'type' || key === 'shortname' || key === 'intro') {
+            if (key === 'scale' || key === 'shortname' || key === 'intro' || key === 'category') {
                 if (typeof(value) !== 'string') {
                     throw new ContractError(`verifyData#: Invalid key "${key}" with value "${value}", value should be string`)
                 }
             }
         }
 
-        if (state.schema.types.indexOf(String(data.type)) === -1) {
-            throw new ContractError(`verifyData#: Unsupported Creator Type: ${data.type}`)
+        if (state.schema.scales.indexOf(String(data.scale)) === -1) {
+            throw new ContractError(`verifyData#: Unsupported Creation Scale: ${data.scale}`)
         }
 
-        if (!Utils.isValidUsername(String(data.shortname))) {
+        if (!(Utils.isValidUsername(String(data.shortname)) || String(data.shortname).length > 42)) {
             throw new ContractError(`verifyData#: Shortname is invalid for: ${data.shortname}`)
         }
 
@@ -179,11 +181,9 @@ class Creator {
             throw new ContractError(`verifyData#: Intro is out of limitaion`)
         }
 
-        data.categories.forEach((e) => {
-            if (state.schema.categories.indexOf(e) === -1) {
-                throw new ContractError(`verifyData#: Categories is invalid for: ${e}`)
-            }
-        })
+        if (state.schema.categories.indexOf(String(data.category)) === -1) {
+            throw new ContractError(`verifyData#: Categories is invalid for: ${String(data.category)}`)
+        }
 
         const exampleTikcer = {
             ticker: '',
@@ -244,15 +244,16 @@ class Creator {
     /**
      * announceCreator announce a creator and adds the creator data into contract
      * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
      * @param {*} data          - creator data
      * @returns state
      */
-    static announceCreator(state, target, data) {
-        if (!Utils.isAddress(String(target))) {
-            throw new ContractError(`announceCreator#: Target is not a address`)
+    static announceCreator(state, caller, data) {
+        if (!Utils.isAddress(String(caller))) {
+            throw new ContractError(`announceCreator#: Caller is not a address`)
         }
-        if (Creator.isCreator(state.creators, target)) {
-            throw new ContractError('announceCreator#: Target is already creator')
+        if (Creator.isCreator(state.creators, caller)) {
+            throw new ContractError('announceCreator#: Caller is already creator')
         }
         try {
             if (typeof(data) !== 'object') {
@@ -276,12 +277,64 @@ class Creator {
             data.items = items
         }
 
-        Object.defineProperty(state.creators, target, {
+        Object.defineProperty(state.creators, caller, {
             value: data,
             writable: true,
             enumerable: true
         })
 
+        return state
+    }
+
+    static updateCreator(state, caller, data) {
+        if (!Utils.isAddress(String(caller))) {
+            throw new ContractError(`updateCreator#: Caller is not a address`)
+        }
+        if (!Creator.isCreator(state.creators, caller)) {
+            throw new ContractError('updateCreator#: Caller is not a creator')
+        }
+        try {
+            if (typeof(data) !== 'object') {
+                data = JSON.parse(data)
+            }
+        } catch (e) {
+            throw new ContractError(`updateCreator#: Data is not a valid JSON or Object ,${e.message}`)
+        }
+
+        const example = {
+            scale: '', intro: '', category: ''
+        }
+
+        if (!Utils.compareKeys(example, data)) {
+            throw new ContractError('updateCreator#: Data input is invalid')
+        }
+
+        for (const [key, value] of Object.entries(data)) {
+            if (key === 'scale' || key === 'intro' || key === 'category') {
+                if (typeof(value) !== 'string') {
+                    throw new ContractError(`updateCreator#: Invalid key "${key}" with value "${value}", value should be string`)
+                }
+            }
+        }
+
+        if (state.schema.scales.indexOf(String(data.scale)) === -1) {
+            throw new ContractError(`updateCreator#: Unsupported Creation Scale: ${data.scale}`)
+        }
+
+        if (String(data.intro).length > 100) {
+            throw new ContractError(`updateCreator#: Intro is out of limitaion`)
+        }
+
+        if (state.schema.categories.indexOf(String(data.category)) === -1) {
+            throw new ContractError(`updateCreator#: Categories is invalid for: ${String(data.category)}`)
+        }
+
+        const creator = JSON.parse(JSON.stringify(state.creators[caller]))
+        creator.scale = data.scale
+        creator.intro = data.intro
+        creator.category = data.category
+
+        state.creators[caller] = creator
         return state
     }
 
@@ -407,49 +460,49 @@ class Creator {
 
 class Likey {
     /**
-     * addType will add a new set of types into type attribute
+     * updateScale will add a new set of scales into scales attribute
      * @param {*} state                 - contract state
      * @param {*} caller                - contract caller
-     * @param {*} updateTypes           - the types would be updated
+     * @param {*} updateScales          - the scales would be updated
      */
-    static updateType(state, caller, updateTypes) {
+    static updateScale(state, caller, updateScales) {
         if (!(Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
-            throw new ContractError('updateType#: Caller is not an admin or owner to this contract')
+            throw new ContractError('updateScale#: Caller is not an admin or owner to this contract')
         }
 
-        const exampleUpdateTypes = {
+        const exampleUpdateScales = {
             add: [],
             remove: []
         }
 
-        if (!Utils.compareKeys(exampleUpdateTypes, updateTypes)) {
-            throw new ContractError('updateType#: Data.UpdateTypes input is invalid')
+        if (!Utils.compareKeys(exampleUpdateScales, updateScales)) {
+            throw new ContractError('updateScale#: Data.UpdateScales input is invalid')
         }
-        for (const v of Object.values(updateTypes)) {
+        for (const v of Object.values(updateScales)) {
             if (!Array.isArray(v)) {
-                throw new ContractError(`updateType#: Data.UpdateTypes ${v} should be an array`)
+                throw new ContractError(`updateScale#: Data.UpdateScales ${v} should be an array`)
             }
         }
 
-        if (updateTypes.add.length === 0 && updateTypes.remove.length === 0) {
-            throw new ContractError(`updateType#: Data.UpdateTypes add and remove input should not be empty for both`)
+        if (updateScales.add.length === 0 && updateScales.remove.length === 0) {
+            throw new ContractError(`updateScale#: Data.UpdateScales add and remove input should not be empty for both`)
         }
 
-        const temp = [...state.schema.types]
-        const updateRemove = temp.filter(e => updateTypes.remove.indexOf(e) === -1)
+        const temp = [...state.schema.scales]
+        const updateRemove = temp.filter(e => updateScales.remove.indexOf(e) === -1)
         const unique = new Set()
 
-        const updated = [...updateTypes.add, ...updateRemove]
+        const updated = [...updateScales.add, ...updateRemove]
         updated.forEach(e => unique.add(e))
         const final = []
         unique.forEach(e => { final.push(e) })
-        state.schema.types = final
+        state.schema.scales = final
 
         return state
     }
 
     /**
-     * addType will add a new set of types into type attribute
+     * updateCategory will add a new set of categories into categories attribute
      * @param {*} state                     - contract state
      * @param {*} caller                    - contract caller
      * @param {*} updateCategories          - the categories would be updated
@@ -560,13 +613,13 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    // updateType write_contract_function
+    // updateScale write_contract_function
     /**
-     * @param {String} function updateType
-     * @param {String} data update types data
+     * @param {String} function updateScale
+     * @param {String} data update scales data
      */
-    if (input.function === 'updateType') {
-        const res = Likey.updateType(state, caller, input.data.updateTypes)
+    if (input.function === 'updateScale') {
+        const res = Likey.updateScale(state, caller, input.data.updateScales)
         return { state: res }
     }
 
@@ -586,7 +639,17 @@ export function handle(state, action) {
      * @param {String|Object|any} data creator object
      */
     if (input.function === 'announceCreator') {
-        const res = Creator.announceCreator(state, input.target, input.data)
+        const res = Creator.announceCreator(state, caller, input.data)
+        return { state: res }
+    }
+    
+    // updateCreator write_contract_function
+    /**
+     * @param {String} function updateCreator
+     * @param {String|Object|any} data creator updating object
+     */
+    if (input.function === 'updateCreator') {
+        const res = Creator.updateCreator(state, caller, input.data)
         return { state: res }
     }
 
