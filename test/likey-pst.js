@@ -11,47 +11,89 @@ const state = {
 let action
 let res
 
-action = {
-    input: {
-        function: 'mint',
-        recipient: '3Kc1_wjK4j7rCD0O9jjjmh4vRVCG0NpJqNrpyX24KHg',
-        data: {
-            owner: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
-            quantity: '10'
-        }
-    }
-}
-
-res = handle(state, action)
-console.log(res.state)
-
+/**
+ * mint 合约写入方法 
+ * 为指定地址铸币   
+ * target 填写地址，quantity 填写数量
+ */
 const mintInput = {
     function: 'mint',
     recipient: 'ADDR',
-    data: {
-        owner: 'ADDR',
-        quantity: '10'
-    }
+    quantity: '10'
 }
 
+/**
+ * burn 合约写入方法 
+ * 销毁指定地址的资产   
+ * target 填写地址，quantity 填写数量
+ */
 const burnInput = {
     function: 'burn',
     target: 'ADDR',
-    data: {
-        owner: 'ADDR',
-        quantity: '3'
-    }
+    quantity: '3'
 }
 
+/**
+ * transfer 合约写入方法 
+ * PST 转账，通用方法   
+ * recipient 填写地址，qty 填写数量
+ */
 const transferInput = {
     function: 'transfer',
-    sponsor: 'ADDR',
+    recipient: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+    qty: '20'
+}
+
+/**
+ * sponsorAdded 合约写入方法 
+ * 购买作者的售卖方案   
+ * 购买时直接通过这个方法转账   
+ * 调用此合约时，必须包含调用合约的 target 和 winstonQty 参数，参见 SmartWeave
+ */
+const sponsorAddedInput = {
+    function: 'sponsorAdded'
+}
+
+/**
+ * donationAdded 合约写入方法 
+ * 打赏作者的动态   
+ * data 结构中含有 statusId 字段  
+ * 调用此合约时，必须包含调用合约的 target 和 winstonQty 参数，参见 SmartWeave
+ */
+const donationAddedInput = {
+    function: 'donationAdded',
     data: {
-        owner: 'ADDR',
-        quantity: ''
+        statusId: "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"
     }
 }
 
-const sponsorAddedInput = {
+/**
+ * editSettings 合约写入方法 
+ * 更新合约支持的设定参数
+ * data 结构中含有 settings 对象   
+ * settings 对象必须是数组，元素也应该是数组
+ */
+const editSettingsInput = {
+    function: "editSettings",
+    data: {
+        settings: []
+    }
+}
 
+/**
+ * editAttributes 合约写入方法 
+ * 更新合约支持的拓展标签
+ * data 结构中含有 attributes 对象   
+ * attributes 对象必须是数组，元素必须是对象
+ */
+const editAttributesInput = {
+    function: "editAttributes",
+    data: {
+        attributes: [
+            { "communityLogo": "address" },
+            // 重复项目将会被舍弃
+            { "communityLogo": "address2" },
+            { "communityLogo2": "address2" }
+        ]
+    }
 }

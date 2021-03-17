@@ -50,7 +50,7 @@ class Admin {
      * @returns boolean
      */
     static isAdmin(admins, address) {
-        if(!Array.isArray(admins)) {
+        if (!Array.isArray(admins)) {
             return false
         }
         if (admins.indexOf(address) !== -1) {
@@ -73,7 +73,7 @@ class Admin {
         if (!Utils.isAddress(target)) {
             throw new ContractError('addAdmin#: Target is not a valid address')
         }
-        
+
         if (state.admins.indexOf(target) !== -1) {
             throw new ContractError('Target is already an admin')
         }
@@ -87,7 +87,7 @@ class Admin {
      * @param {*} caller    - Contract function caller
      * @param {*} target    - Target would be added into admin list
      */
-     static removeAdmin(state, caller, target) {
+    static removeAdmin(state, caller, target) {
         if (!Ownable.isOwner(state.owner, caller)) {
             throw new ContractError('removeAdmin#: Caller is not the owner of this contract')
         }
@@ -111,7 +111,7 @@ class Utils {
      * @returns boolean
      */
     static isAddress(address) {
-        if (typeof(address) !== 'string') {
+        if (typeof (address) !== 'string') {
             throw new ContractError('isAddress#: Address is not string')
         }
         if (address === 'undefined') {
@@ -126,7 +126,7 @@ class Utils {
      * @returns boolean
      */
     static isValidUsername(string) {
-        if (typeof(string) !== 'string') {
+        if (typeof (string) !== 'string') {
             throw new ContractError('isValidUsername#: input string is not string')
         }
         return /^[a-zA-Z]+([._]?[a-zA-Z0-9]+)*$/.test(string)
@@ -236,7 +236,7 @@ class Ticker {
         if (!balancesState.hasOwnProperty(recipient)) {
             this._mint(state, recipient, qty)
             balancesState[recipient] = state.balances[recipient]
-        } 
+        }
         else {
             const add = BigInt(balancesState[recipient]) + BigInt(String(qty))
             balancesState[recipient] = add.toString()
@@ -256,8 +256,8 @@ class Ticker {
      * @param {*} data          - mint data
      */
     static mint(state, caller, recipient, quantity) {
-        if (!Ownable.isOwner(state.owner, caller)) {
-            throw new ContractError('mint#: Caller is not the creator of its own')
+        if (!(Ownable.isOwner(state.owner, caller) || Admin.isAdmin(state.admins, caller))) {
+            throw new ContractError('mint#: Caller is not the creator or admin of this contract')
         }
         if (!Utils.isAddress(String(recipient))) {
             throw new ContractError(`mint#: Recipient is not a address`)
@@ -277,8 +277,8 @@ class Ticker {
      * @param {*} quantity      - quantity
      */
     static burn(state, caller, target, quantity) {
-        if (!Ownable.isOwner(state.owner, caller)) {
-            throw new ContractError('burn#: Caller is not the creator of its own')
+        if (!(Ownable.isOwner(state.owner, caller) || Admin.isAdmin(state.admins, caller))) {
+            throw new ContractError('burn#: Caller is not the creator or admin of this contract')
         }
         if (!Utils.isAddress(String(target))) {
             throw new ContractError(`burn#: Target is not a address`)
@@ -325,9 +325,15 @@ class Ticker {
      * @param {*} state         - contract state
      */
     static sponsorAdded(state) {
+        if (!(SmartWeave.transaction.target || SmartWeave.transaction.target === '')) {
+            throw new ContractError('sponsorAdded#: Sponsor invalid because of transfering target not specified')
+        }
+        if (SmartWeave.transaction.target !== state.owner) {
+            throw new ContractError('sponsorAdded#: Sponsor failed because of transfering target is not the owner of this contract')
+        }
         const ratio = Utils.ratioConversion(state)
         const quantity = BigInt(SmartWeave.transaction.quantity) * ratio.original / ratio.conversion
-        
+
         this._mint(state, SmartWeave.transaction.owner, quantity)
         this._updateHolders(state)
         this._updateTotalSupply(state)
@@ -361,10 +367,81 @@ class Ticker {
     }
 }
 
-     * @param {*} data          - mint data
+class LikeyPST {
+    /**
+     * editSettings edit the settings of this contract
+     * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
+     * @param {*} data          - setting data
      */
-    static transfer(state, caller, recipient, data) {
+    static editSettings(state, caller, data) {
+        if (!(Ownable.isOwner(state.owner, caller) || Admin.isAdmin(state.admins, caller))) {
+            throw new ContractError('editSettings#: Caller is not the creator of its own')
+        }
 
+        if (!Array.isArray(data.settings)) {
+            throw new ContractError('editSettings#: Data.Settings input is invalid, should be array')
+        }
+        for (const i of data.settings) {
+            if (!Array.isArray(i)) {
+                throw new ContractError(`editSettings#: Data.Settings<Array> input ${i} is invalid, should be array`)
+            }
+            console.log(i)
+            if (i.length === 0) {
+                throw new ContractError(`editSettings#: Data.Settings<Object> input ${i} is invalid, should not be empty`)
+            }
+            for (const e of i) {
+                if (!(e || typeof (e) !== 'string')) {
+                    throw new ContractError(`editSettings#: Data.Settings<Object> input value ${e} is invalid, should not be null`)
+                }
+            }
+        }
+
+        state.settings = data.settings
+        return state
+    }
+
+    /**
+     * editAttributes edit the attributes of this contract
+     * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
+     * @param {*} data          - setting data
+     */
+    static editAttributes(state, caller, data) {
+        if (!(Ownable.isOwner(state.owner, caller) || Admin.isAdmin(state.admins, caller))) {
+            throw new ContractError('editAttributes#: Caller is not the creator of its own')
+        }
+
+        if (!Array.isArray(data.attributes)) {
+            throw new ContractError('editAttributes#: Data.Attributes input is invalid, should be array')
+        }
+        for (const i of data.attributes) {
+            if (typeof (i) !== 'object') {
+                throw new ContractError(`editAttributes#: Data.Attributes input ${i} is invalid, should be object`)
+            }
+            if (Object.keys(i).length === 0) {
+                throw new ContractError(`editAttributes#: Data.Attributes<Object> input ${Object.keys(i)} is invalid, should not be empty`)
+            }
+            for (const e of Object.values(i)) {
+                if (!e) {
+                    throw new ContractError(`editAttributes#: Data.Attributes<Object> input value ${e} is invalid, should not be null`)
+                }
+            }
+        }
+
+        const uniqueKey = []
+        const uniqueObj = []
+        data.attributes.forEach((e) => {
+            const key = Object.keys(e).pop()
+            if (uniqueKey.indexOf(key) === -1) {
+                uniqueKey.push(key)
+                uniqueObj.push(e)
+            }
+            return
+        })
+
+        state.attributes = uniqueObj
+        return state
     }
 }
 
@@ -381,7 +458,7 @@ export function handle(state, action) {
         const res = Ticker.mint(state, caller, input.recipient, input.quantity)
         return { state: res }
     }
-    
+
     // burn write_contract_function
     /**
      * @param {String} target address
@@ -391,7 +468,7 @@ export function handle(state, action) {
         const res = Ticker.burn(state, caller, input.target, input.quantity)
         return { state: res }
     }
-    
+
     // transfer write_contract_function
     /**
      * @param {String} target address
@@ -417,7 +494,24 @@ export function handle(state, action) {
      */
     if (input.function === 'donationAdded') {
         const res = Ticker.donationAdded(state, caller, input.data)
-        const res = Ticker.transfer(state, caller, input.recipient, input.data)
+        return { state: res }
+    }
+
+    // editSettings write_contract_function
+    /**
+     * @param {Object} data settings data
+     */
+    if (input.function === 'editSettings') {
+        const res = LikeyPST.editSettings(state, caller, input.data)
+        return { state: res }
+    }
+
+    // editAttributes write_contract_function
+    /**
+     * @param {Object} data attributes data
+     */
+    if (input.function === 'editAttributes') {
+        const res = LikeyPST.editAttributes(state, caller, input.data)
         return { state: res }
     }
 }

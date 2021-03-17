@@ -1,27 +1,15 @@
 {
-    "name": "Ayaka Neko Coin",
-    "ticker": "ANC",
-    "owner": "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0",
-    "admins": ["A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"],
+    "name": "",
+    "ticker": "",
+    "owner": "",
+    "admins": [""],
     "divisibility": 1000000000000,
-    "ratio": "1:1.555555555555",
-    "balances": {
-
-    },
+    "ratio": "",
+    "balances": {},
     "holders": "0",
     "totalSupply": "0",
     "donations": [],
-    "attributes": [
-        { "communityLogo": "address" }
-    ],
-    "settings": [
-        [
-            "communityLogo",
-            "address"
-        ],
-        [
-            "communityAppUrl",
-            ""
-        ]
-    ]
+    "attributes": [],
+    "settings": [],
+    "version": "1.0.0"
 }
