@@ -1,0 +1,23 @@
+{
+    "name": "Ayaka Neko Coin",
+    "ticker": "ANC",
+    "owner": "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0",
+    "admins": ["A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"],
+    "divisibility": 1000000000000,
+    "balances": {
+
+    },
+    "attributes": [
+        { "communityLogo": "address" }
+    ],
+    "settings": [
+        [
+            "communityLogo",
+            "address"
+        ],
+        [
+            "communityAppUrl",
+            ""
+        ]
+    ]
+}
