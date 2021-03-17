@@ -98,7 +98,7 @@ const shortNameExist = {
  * 添加一个地址为管理员，该操作只有合约拥有者有权限完成   
  * target 填写地址
  */
-const addAdmin = {
+const addAdminInput = {
     function: 'addAdmin',
     target: 'ADDR'
 }
@@ -167,23 +167,45 @@ const updateCategoryInput = {
 const announceCreatorInput = {
     function: 'announceCreator',
     data: {
+        /** 创作规模 */
         scale: 'Personal',
+        /** 短链接 */
         shortname: 'xxx',
+        /** 自我介绍 */
         intro: 'xxx',
+        /** 创作类型 */
         category: '',
+        /** PST 代币相关 */
         ticker: {
+            /** 代币缩写 */
             ticker: 'EXA',
+            /** 代币名称 */
             name: 'Example Name',
+            /** 代币合约地址 */
             contract: 'ADDRESS',
         },
+        /** 售卖方案列表 */
         items: [
             {
+                /** 标题 */
                 title: "Example Title",
+                /** 价值 */
                 value: '10',
+                /** 说明 */
                 description: "Example Description"
             }
         ]
     }
+}
+
+/**
+ * removeCreator 合约写入方法 
+ * 移除一个创作者
+ * target 填写创作者地址
+ */
+const removeCreatorInput = {
+    function: 'removeCreator',
+    target: 'addr'
 }
 
 /**
@@ -202,52 +224,33 @@ const updateCreatorInput = {
 }
 
 /**
- * addItem 合约写入方法 
- * 为创作者添加多个售卖物品   
+ * editItem 合约写入方法 
+ * 为创作者编辑多个售卖物品   
  * data 结构中必须含有 items 字段，
  * items 的物品包含 title，value，description 字段
  */
-const addItemInput = {
-    function: 'addItem',
-    target: 'ADDRESS',
-    data: {
-        items: [
-            {
-                title: 'Example Title',
-                value: '10',
-                description: ''
-            }
-        ]
-    }
-}
-
-/**
- * removeItem 合约写入方法 
- * 为创作者移除多个售卖物品   
- * data 结构中必须含有 indexes 字段，indexes 是对应的合约中存储的索引 id 的值
- */
-const removeItemInput = {
-    function: 'removeItem',
-    target: 'ADDRESS',
-    indexes: [1]
-}
-
-/**
- * editItem 合约写入方法 
- * 编辑多个创作者的售卖物品   
- * data 结构中必须含有 items 字段，   
- * items 的物品包含 title，value，description，id 字段
- */
 const editItemInput = {
     function: 'editItem',
-    target: 'ADDR',
+    target: 'ADDRESS',
     data: {
         items: [
+            // id 为 0 的对象不传入的话等效于删除
+            // 数据传入后，id 将会重新被排序，请不要完全依赖于 id 作为绝对索引
+            // {
+            //     id: 0
+            //     ...
+            // },
             {
-                id: 0,
-                title: "我是第零位",
+                id: 1,
+                title: '变更后',
                 value: '10',
-                description: "改变之后"
+                description: '变更后'
+            },
+            {
+                id: 4,
+                title: '变更后 2',
+                value: '20',
+                description: '变更后 2'
             }
         ]
     }

@@ -1,6 +1,6 @@
 /**
  * Likey Contract
- * Version: 1.0.0
+ * Version: 1.0.1
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -8,6 +8,8 @@
  * Assosiated With: Project LIKEY
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
+
+const ContractError = Error
 
 class Ownable {
     /**
@@ -51,7 +53,7 @@ class Admin {
      * @returns boolean
      */
     static isAdmin(admins, address) {
-        if(!Array.isArray(admins)) {
+        if (!Array.isArray(admins)) {
             return false
         }
         if (admins.indexOf(address) !== -1) {
@@ -74,7 +76,7 @@ class Admin {
         if (!Utils.isAddress(target)) {
             throw new ContractError('addAdmin#: Target is not a valid address')
         }
-        
+
         if (state.admins.indexOf(target) !== -1) {
             throw new ContractError('Target is already an admin')
         }
@@ -88,7 +90,7 @@ class Admin {
      * @param {*} caller    - Contract function caller
      * @param {*} target    - Target would be added into admin list
      */
-     static removeAdmin(state, caller, target) {
+    static removeAdmin(state, caller, target) {
         if (!Ownable.isOwner(state.owner, caller)) {
             throw new ContractError('removeAdmin#: Caller is not the owner of this contract')
         }
@@ -112,7 +114,7 @@ class Utils {
      * @returns boolean
      */
     static isAddress(address) {
-        if (typeof(address) !== 'string') {
+        if (typeof (address) !== 'string') {
             throw new ContractError('isAddress#: Address is not string')
         }
         return /^([a-zA-Z0-9]|_|-){43}$/.test(address)
@@ -124,7 +126,7 @@ class Utils {
      * @returns boolean
      */
     static isValidUsername(string) {
-        if (typeof(string) !== 'string') {
+        if (typeof (string) !== 'string') {
             throw new ContractError('isValidUsername#: input string is not string')
         }
         return /^[a-zA-Z]+([._]?[a-zA-Z0-9]+)*$/.test(string)
@@ -152,7 +154,7 @@ class Creator {
         const example = {
             scale: '', shortname: '', intro: '', category: '',
             ticker: { ticker: '', name: '', contract: '' },
-            items: [ { title: "", value: '0', description: "" } ]
+            items: [{ title: "", value: '0', description: "" }]
         }
 
         if (!Utils.compareKeys(example, data)) {
@@ -161,7 +163,7 @@ class Creator {
 
         for (const [key, value] of Object.entries(data)) {
             if (key === 'scale' || key === 'shortname' || key === 'intro' || key === 'category') {
-                if (typeof(value) !== 'string') {
+                if (typeof (value) !== 'string') {
                     throw new ContractError(`verifyData#: Invalid key "${key}" with value "${value}", value should be string`)
                 }
             }
@@ -195,10 +197,14 @@ class Creator {
 
         for (const [key, value] of Object.entries(data.ticker)) {
             if (key === 'ticker' || key === 'name' || key === 'contract') {
-                if (typeof(value) !== 'string') {
+                if (typeof (value) !== 'string') {
                     throw new ContractError(`verifyData#: Invalid ticker key "${key}" with value "${value}", value should be string`)
                 }
             }
+        }
+
+        if (!Utils.isAddress(String(data.ticker.contract))) {
+            throw new ContractError(`verifyData#: Contract is not a address`)
         }
     }
 
@@ -226,11 +232,11 @@ class Creator {
 
                 for (const [key, value] of Object.entries(e)) {
                     if (key === 'title' || key === 'description' || key === 'value') {
-                        if (typeof(value) !== 'string') {
+                        if (typeof (value) !== 'string') {
                             throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be string`)
                         }
                     }
-                    
+
                     if (hasId && key === 'id' && !Number.isInteger(value)) {
                         throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be integer`)
                     }
@@ -254,7 +260,7 @@ class Creator {
             throw new ContractError('announceCreator#: Caller is already creator')
         }
         try {
-            if (typeof(data) !== 'object') {
+            if (typeof (data) !== 'object') {
                 data = JSON.parse(data)
             }
         } catch (e) {
@@ -284,6 +290,26 @@ class Creator {
         return state
     }
 
+    /**
+     * removeCreator removes a creator from creators
+     * @param {*} state         - contract state
+     * @param {*} caller        - contract caller
+     * @param {*} data          - data
+     */
+    static removeCreator(state, caller, target) {
+        if (!Creator.isCreator(state.creators, target)) {
+            throw new ContractError('addItemToCreator#: Target is not a creator')
+        }
+        if (!(target === caller || Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('addItemToCreator#: Caller is not the creator of its own or admin/owner')
+        }
+
+        const creators = JSON.parse(JSON.stringify(state.creators))
+        delete creators[target]
+        state.creators = creators
+        return state
+    }
+
     static updateCreator(state, caller, data) {
         if (!Utils.isAddress(String(caller))) {
             throw new ContractError(`updateCreator#: Caller is not a address`)
@@ -292,7 +318,7 @@ class Creator {
             throw new ContractError('updateCreator#: Caller is not a creator')
         }
         try {
-            if (typeof(data) !== 'object') {
+            if (typeof (data) !== 'object') {
                 data = JSON.parse(data)
             }
         } catch (e) {
@@ -309,7 +335,7 @@ class Creator {
 
         for (const [key, value] of Object.entries(data)) {
             if (key === 'scale' || key === 'intro' || key === 'category') {
-                if (typeof(value) !== 'string') {
+                if (typeof (value) !== 'string') {
                     throw new ContractError(`updateCreator#: Invalid key "${key}" with value "${value}", value should be string`)
                 }
             }
@@ -352,7 +378,7 @@ class Creator {
             throw new ContractError('addItemToCreator#: Caller is not the creator of its own or admin/owner')
         }
         try {
-            if (typeof(data) !== 'object') {
+            if (typeof (data) !== 'object') {
                 data = JSON.parse(data)
             }
         } catch (e) {
@@ -363,7 +389,7 @@ class Creator {
             throw new ContractError(`addItemToCreator#: Data.Items should not be empty`)
         }
         this.verifyItems(data)
-        
+
         const items = [...state.creators[target].items, ...data.items]
         if (items.length > Number.MAX_VALUE - 100) {
             throw new ContractError(`addItemToCreator#: The number of yours total items has reached the limitation of MAX_VALUE`)
@@ -413,25 +439,38 @@ class Creator {
      */
     static editItem(state, caller, target, data) {
         if (!Creator.isCreator(state.creators, target)) {
-            throw new ContractError('removeItemFromCreator#: Target is not a creator')
+            throw new ContractError('editItem#: Target is not a creator')
         }
         if (!(target === caller || Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
-            throw new ContractError('removeItemFromCreator#: Caller is not the creator of its own or admin/owner')
+            throw new ContractError('editItem#: Caller is not the creator of its own or admin/owner')
         }
         try {
-            if (typeof(data) !== 'object') {
+            if (typeof (data) !== 'object') {
                 data = JSON.parse(data)
             }
         } catch (e) {
-            throw new ContractError(`addItemToCreator#: Data is not a valid JSON or Object ,${e.message}`)
+            throw new ContractError(`editItem#: Data is not a valid JSON or Object ,${e.message}`)
         }
         if (data.items.length === 0) {
-            throw new ContractError(`addItemToCreator#: Data.Items should not be empty`)
+            throw new ContractError(`editItem#: Data.Items should not be empty`)
+        }
+        if (data.items.length > Number.MAX_VALUE - 100) {
+            throw new ContractError(`editItem#: The number of yours total items has reached the limitation of MAX_VALUE`)
         }
         this.verifyItems(data, true)
-        
-        const editItems = {}
+
+        // Unique for id
+        const resArr = []
         data.items.forEach(e => {
+            const i = resArr.findIndex(x => x.id == e.id);
+            if(i <= -1){
+                resArr.push(e);
+            }
+        })
+
+        // Pump into objects
+        const editItems = {}
+        resArr.forEach(e => {
             Object.defineProperty(editItems, String(e.id), {
                 value: {
                     title: e.title,
@@ -442,16 +481,15 @@ class Creator {
                 enumerable: true
             })
         })
-        const temp = [...state.creators[target].items]
-        temp.forEach((e, index) => {
-            if (Object.keys(editItems).indexOf(String(e.id)) !== -1) {
-                const pending = editItems[String(e.id)]
-                temp[index].title = pending.title
-                temp[index].value = pending.value
-                temp[index].description = pending.description
-            }
+
+        // Build Result
+        const final = []
+        Object.keys(editItems).forEach((i, index) => {
+            const pending = editItems[String(i)]
+            pending['id'] = index
+            final.push(pending)
         })
-        state.creators[target].items = temp
+        state.creators[target].items = final
         return state
     }
 }
@@ -505,7 +543,7 @@ class Likey {
      * @param {*} caller                    - contract caller
      * @param {*} updateCategories          - the categories would be updated
      */
-     static updateCategory(state, caller, updateCategories) {
+    static updateCategory(state, caller, updateCategories) {
         if (!(Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
             throw new ContractError('updateCategory#: Caller is not an admin or owner to this contract')
         }
@@ -630,7 +668,7 @@ export function handle(state, action) {
         const res = Likey.updateCategory(state, caller, input.data.updateCategories)
         return { state: res }
     }
-    
+
     // announceCreator write_contract_function
     /**
      * @param {String} function announceCreator
@@ -640,7 +678,17 @@ export function handle(state, action) {
         const res = Creator.announceCreator(state, caller, input.data)
         return { state: res }
     }
-    
+
+    // removeCreator write_contract_function
+    /**
+     * @param {String} function removeCreator
+     * @param {String} target address
+     */
+    if (input.function === 'removeCreator') {
+        const res = Creator.removeCreator(state, caller, input.target)
+        return { state: res }
+    }
+
     // updateCreator write_contract_function
     /**
      * @param {String} function updateCreator
@@ -648,26 +696,6 @@ export function handle(state, action) {
      */
     if (input.function === 'updateCreator') {
         const res = Creator.updateCreator(state, caller, input.data)
-        return { state: res }
-    }
-
-    // addItem write_contract_function
-    /**
-     * @param {String} function addItem
-     * @param {String|Object|any} data item object
-     */
-    if (input.function === 'addItem') {
-        const res = Creator.addItem(state, caller, input.target, input.data)
-        return { state: res }
-    }
-
-    // removeItem write_contract_function
-    /**
-     * @param {String} function removeItem
-     * @param {String} title
-     */
-    if (input.function === 'removeItem') {
-        const res = Creator.removeItem(state, caller, input.target, input.indexes)
         return { state: res }
     }
 
