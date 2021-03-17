@@ -158,7 +158,7 @@ class Creator {
         }
 
         if (!Utils.compareKeys(example, data)) {
-            throw new ContractError('verifyData#: Data input is invalid')
+            throw new ContractError('verifyData#: Data input is invalid, keys does not match the schema')
         }
 
         for (const [key, value] of Object.entries(data)) {
@@ -192,7 +192,7 @@ class Creator {
         }
 
         if (!Utils.compareKeys(exampleTikcer, data.ticker) || Object.keys(data.ticker) < 3) {
-            throw new ContractError('verifyData#: Data.Ticker input is invalid')
+            throw new ContractError('verifyData#: Data.Ticker input is invalid, keys does not match the schema')
         }
 
         for (const [key, value] of Object.entries(data.ticker)) {
@@ -227,7 +227,7 @@ class Creator {
             for (let i = 0; i < data.items.length; i++) {
                 const e = data.items[i]
                 if (!Utils.compareKeys(exampleItem, e)) {
-                    throw new ContractError(`verifyItems#: Data.Items items[${i}] input is invalid`)
+                    throw new ContractError(`verifyItems#: Data.Items items[${i}] input is invalid, keys does not match the schema`)
                 }
 
                 for (const [key, value] of Object.entries(e)) {
@@ -330,7 +330,7 @@ class Creator {
         }
 
         if (!Utils.compareKeys(example, data)) {
-            throw new ContractError('updateCreator#: Data input is invalid')
+            throw new ContractError('updateCreator#: Data input is invalid, keys does not match the schema')
         }
 
         for (const [key, value] of Object.entries(data)) {
@@ -512,7 +512,7 @@ class Likey {
         }
 
         if (!Utils.compareKeys(exampleUpdateScales, updateScales)) {
-            throw new ContractError('updateScale#: Data.UpdateScales input is invalid')
+            throw new ContractError('updateScale#: Data.UpdateScales input is invalid, keys does not match the schema')
         }
         for (const v of Object.values(updateScales)) {
             if (!Array.isArray(v)) {
@@ -554,7 +554,7 @@ class Likey {
         }
 
         if (!Utils.compareKeys(exampleUpdateCategories, updateCategories)) {
-            throw new ContractError('updateCategory#: Data.UpdateCategories input is invalid')
+            throw new ContractError('updateCategory#: Data.UpdateCategories input is invalid, keys does not match the schema')
         }
         for (const v of Object.values(updateCategories)) {
             if (!Array.isArray(v)) {

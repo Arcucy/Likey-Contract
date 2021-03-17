@@ -217,7 +217,6 @@ const updateCreatorInput = {
     function: 'updateCreator',
     data: {
         scale: 'Personal',
-        shortname: 'xxxx2',
         intro: 'New!!!',
         category: 'Type3'
     }
@@ -225,7 +224,7 @@ const updateCreatorInput = {
 
 /**
  * editItem 合约写入方法 
- * 为创作者编辑多个售卖物品   
+ * 为创作者添加多个售卖物品   
  * data 结构中必须含有 items 字段，
  * items 的物品包含 title，value，description 字段
  */
