@@ -27,7 +27,6 @@ class Ownable {
      * @param {*} target
      */
     static transferOwnership(state, caller, target) {
-        console.log(state, caller, target)
         if (!Ownable.isOwner(state.owner, caller)) {
             throw new ContractError('transferOwnership#: Caller is not the owner of this contract')
         }
@@ -115,6 +114,9 @@ class Utils {
         if (typeof (address) !== 'string') {
             throw new ContractError('isAddress#: Address is not string')
         }
+        if ((address === 'undefined' || !string)) {
+            throw new ContractError('isAddress#: Address is invalid')
+        }
         return /^([a-zA-Z0-9]|_|-){43}$/.test(address)
     }
 
@@ -126,6 +128,9 @@ class Utils {
     static isValidUsername(string) {
         if (typeof (string) !== 'string') {
             throw new ContractError('isValidUsername#: input string is not string')
+        }
+        if ((string === 'undefined' || !string)) {
+            throw new ContractError('isAddress#: Address is invalid')
         }
         return /^[a-zA-Z]+([._]?[a-zA-Z0-9]+)*$/.test(string)
     }
@@ -152,7 +157,7 @@ class Creator {
         const example = {
             scale: '', shortname: '', intro: '', category: '',
             ticker: { ticker: '', name: '', contract: '' },
-            items: [{ title: "", value: '0', description: "" }]
+            items: [{ title: '', value: '0', description: '' }]
         }
 
         if (!Utils.compareKeys(example, data)) {
@@ -162,7 +167,7 @@ class Creator {
         for (const [key, value] of Object.entries(data)) {
             if (key === 'scale' || key === 'shortname' || key === 'intro' || key === 'category') {
                 if (typeof (value) !== 'string') {
-                    throw new ContractError(`verifyData#: Invalid key "${key}" with value "${value}", value should be string`)
+                    throw new ContractError(`verifyData#: Invalid key '${key}' with value '${value}', value should be string`)
                 }
             }
         }
@@ -196,7 +201,7 @@ class Creator {
         for (const [key, value] of Object.entries(data.ticker)) {
             if (key === 'ticker' || key === 'name' || key === 'contract') {
                 if (typeof (value) !== 'string') {
-                    throw new ContractError(`verifyData#: Invalid ticker key "${key}" with value "${value}", value should be string`)
+                    throw new ContractError(`verifyData#: Invalid ticker key '${key}' with value '${value}', value should be string`)
                 }
             }
         }
@@ -208,9 +213,9 @@ class Creator {
 
     static verifyItems(data, hasId) {
         const exampleItem = {
-            title: "",
+            title: '',
             value: '10',
-            description: ""
+            description: ''
         }
 
         if (hasId) {
@@ -231,12 +236,12 @@ class Creator {
                 for (const [key, value] of Object.entries(e)) {
                     if (key === 'title' || key === 'description' || key === 'value') {
                         if (typeof (value) !== 'string') {
-                            throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be string`)
+                            throw new ContractError(`verifyItems#: Invalid items[${i}] key '${key}' with value '${value}', value should be string`)
                         }
                     }
 
                     if (hasId && key === 'id' && !Number.isInteger(value)) {
-                        throw new ContractError(`verifyItems#: Invalid items[${i}] key "${key}" with value "${value}", value should be integer`)
+                        throw new ContractError(`verifyItems#: Invalid items[${i}] key '${key}' with value '${value}', value should be integer`)
                     }
                 }
             }
@@ -334,7 +339,7 @@ class Creator {
         for (const [key, value] of Object.entries(data)) {
             if (key === 'scale' || key === 'intro' || key === 'category') {
                 if (typeof (value) !== 'string') {
-                    throw new ContractError(`updateCreator#: Invalid key "${key}" with value "${value}", value should be string`)
+                    throw new ContractError(`updateCreator#: Invalid key '${key}' with value '${value}', value should be string`)
                 }
             }
         }
@@ -707,5 +712,5 @@ export function handle(state, action) {
         return { state: res }
     }
 
-    throw new ContractError(`No function supplied or function not recognised: "${input.function}"`)
+    throw new ContractError(`No function supplied or function not recognised: '${input.function}'`)
 }
