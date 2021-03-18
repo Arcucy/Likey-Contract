@@ -1,67 +1,15 @@
-import fs, { stat } from 'fs'
-import path from 'path'
-import { handle } from '../contracts/likey-contract.js'
+// import fs, { stat } from 'fs'
+// import path from 'path'
+// import { handle } from '../contracts/likey-contract.js'
 
-const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
+// const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
 
-const state = {
-    ...initState
-}
+// const state = {
+//     ...initState
+// }
 
-let action
-let res
-
-const user = {
-    type: '',
-    shortname: '',
-    intro: '',
-    category: [],
-}
-
-const pst = {
-    name: '',
-    ticker: '',
-    balances: [],
-    attributes: [
-        { 'communityLogo': 'address' }
-    ],
-    settings: [
-        [
-            'communityLogo',
-            'address'
-        ],
-        [
-            "communityAppUrl",
-            "contract addr"
-        ]
-    ]
-}
-
-const expected = {
-    admins: [],
-    owner: '',
-    creators: {
-        'ADDRESS': {
-            scale: 'single',
-            shortname: 'xxx',
-            intro: '[x-1000]',
-            category: '',
-            ticker: {
-                name: 'TICKER',
-                ticker: 'TIC',
-                contract: 'ADDR',
-            },
-            items: [
-                {
-                    title: 'Example Title',
-                    /** 必须换算为最小小数点 */
-                    value: '10',
-                    description: ''
-                }
-            ]
-        }
-    }
-}
+// let action
+// let res
 
 /**
  * isOwner 合约读取方法

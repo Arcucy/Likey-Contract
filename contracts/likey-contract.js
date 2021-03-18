@@ -1,6 +1,6 @@
 /**
  * Likey Contract
- * Version: 1.0.1
+ * Version: 1.0.2
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -114,7 +114,7 @@ class Utils {
         if (typeof (address) !== 'string') {
             throw new ContractError('isAddress#: Address is not string')
         }
-        if ((address === 'undefined' || !string)) {
+        if ((address === 'undefined' || !address)) {
             throw new ContractError('isAddress#: Address is invalid')
         }
         return /^([a-zA-Z0-9]|_|-){43}$/.test(address)
@@ -178,6 +178,14 @@ class Creator {
 
         if (!(Utils.isValidUsername(String(data.shortname)) || String(data.shortname).length > 42)) {
             throw new ContractError(`verifyData#: Shortname is invalid for: ${data.shortname}`)
+        }
+
+        const shortnames = []
+        for (const e of Object.values(state.creators)) {
+            shortnames.push(String(e.shortname).toLowerCase())
+        }
+        if (shortnames.indexOf(String(data.shortname).toLowerCase()) !== -1) {
+            throw new ContractError(`verifyData#: Shortname has been taken by someone else`)
         }
 
         if (String(data.intro).length > 100) {
@@ -616,9 +624,9 @@ export function handle(state, action) {
     if (input.function === 'shortNameExist') {
         const shortnames = []
         for (const e of Object.values(state.creators)) {
-            shortnames.push(e.shortname)
+            shortnames.push(String(e.shortname).toLowerCase())
         }
-        return { result: shortnames.indexOf(input.shortname) !== -1 }
+        return { result: shortnames.indexOf(String(input.shortname).toLowerCase()) !== -1 }
     }
 
     // Write

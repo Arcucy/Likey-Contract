@@ -1,15 +1,15 @@
-import fs from 'fs'
-import path from 'path'
-import { handle } from '../contracts/likey-pst.js'
+// import fs from 'fs'
+// import path from 'path'
+// import { handle } from '../contracts/likey-pst.js'
 
-const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-pst-initial.json'))).toString('utf-8'))
+// const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-pst-initial.json'))).toString('utf-8'))
 
-const state = {
-    ...initState
-}
+// const state = {
+//     ...initState
+// }
 
-let action
-let res
+// let action
+// let res
 
 /**
  * mint 合约写入方法 
