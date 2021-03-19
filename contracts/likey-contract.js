@@ -9,6 +9,8 @@
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
 
+const ContractError = Error
+
 class Ownable {
     /**
      * isOwner checks whether the address is the owner of this contract
@@ -150,7 +152,8 @@ class Utils {
 
 class Creator {
     static isCreator(creators, address) {
-        return creators.hasOwnProperty(address)
+        console.log(Object.keys(creators))
+        return Object.keys(creators).indexOf(address) !== -1
     }
 
     static verifyData(state, data) {
@@ -309,10 +312,10 @@ class Creator {
      */
     static removeCreator(state, caller, target) {
         if (!Creator.isCreator(state.creators, target)) {
-            throw new ContractError('addItemToCreator#: Target is not a creator')
+            throw new ContractError('removeCreator#: Target is not a creator')
         }
         if (!(target === caller || Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller))) {
-            throw new ContractError('addItemToCreator#: Caller is not the creator of its own or admin/owner')
+            throw new ContractError('removeCreator#: Caller is not the creator of its own or admin/owner')
         }
 
         const creators = JSON.parse(JSON.stringify(state.creators))
