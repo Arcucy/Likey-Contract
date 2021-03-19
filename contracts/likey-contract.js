@@ -1,6 +1,6 @@
 /**
  * Likey Contract
- * Version: 1.0.2
+ * Version: 1.0.3
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -8,8 +8,6 @@
  * Assosiated With: Project LIKEY
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
-
-const ContractError = Error
 
 class Ownable {
     /**
