@@ -1,6 +1,6 @@
 /**
  * Likey PST Contract
- * Version: 1.0.0
+ * Version: 1.0.1
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -8,6 +8,8 @@
  * Assosiated With: Project LIKEY
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
+
+const ContractError = Error
 
 class Ownable {
     /**
@@ -368,6 +370,14 @@ class Ticker {
 }
 
 class LikeyPST {
+    static updateRatio(state, caller, data) {
+        if (!(Ownable.isOwner(state.owner, caller))) {
+            throw new ContractError('updateRatio#: Caller is not the creator of its own')
+        }
+        state.ratio = data.ratio
+        return state
+    }
+
     /**
      * editSettings edit the settings of this contract
      * @param {*} state         - contract state
@@ -376,7 +386,7 @@ class LikeyPST {
      */
     static editSettings(state, caller, data) {
         if (!(Ownable.isOwner(state.owner, caller) || Admin.isAdmin(state.admins, caller))) {
-            throw new ContractError('editSettings#: Caller is not the creator of its own')
+            throw new ContractError('editSettings#: Caller is not the creator of its own or admin')
         }
 
         if (!Array.isArray(data.settings)) {
@@ -494,6 +504,15 @@ export function handle(state, action) {
      */
     if (input.function === 'donationAdded') {
         const res = Ticker.donationAdded(state, caller, input.data)
+        return { state: res }
+    }
+
+    // updateRatio write_contract_function
+    /**
+     * @param {Object} data ratio data
+     */
+     if (input.function === 'updateRatio') {
+        const res = LikeyPST.updateRatio(state, caller, input.data)
         return { state: res }
     }
 

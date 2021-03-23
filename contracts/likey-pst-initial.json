@@ -1,15 +1,15 @@
 {
-    "name": "Ayaka Neko Test",
-    "ticker": "ANT",
-    "owner": "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0",
-    "admins": ["A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"],
+    "name": "",
+    "ticker": "",
+    "owner": "",
+    "admins": [""],
     "divisibility": 1000000000000,
-    "ratio": "1:2",
+    "ratio": "1:1",
     "balances": {},
     "holders": "0",
     "totalSupply": "0",
     "donations": [],
     "attributes": [],
     "settings": [],
-    "version": "1.0.0"
+    "version": "1.0.1"
 }

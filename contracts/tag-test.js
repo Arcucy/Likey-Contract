@@ -4,8 +4,7 @@ export function handle(state, action) {
 
     if (input.function === 'tag') {
         const temp = [...state.tags]
-        const pending = []
-        SmartWeave.transaction.tags.forEach(e => pending.push(e))
+        const pending = SmartWeave.transaction.tags
         temp.push(pending)
 
         state.tags = temp

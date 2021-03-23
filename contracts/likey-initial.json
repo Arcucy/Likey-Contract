@@ -1,8 +1,8 @@
 {
     "admins": [
-        "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"
+        ""
     ],
-    "owner": "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0",
+    "owner": "",
     "creators": {},
     "schema": {
         "categories": [
@@ -35,5 +35,5 @@
             "Team"
         ]
     },
-    "version": "1.0.3"
+    "version": "1.0.4"
 }

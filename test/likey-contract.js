@@ -1,16 +1,90 @@
-// import fs, { stat } from 'fs'
-// import path from 'path'
-// import { handle } from '../contracts/likey-contract.js'
+import fs, { stat } from 'fs'
+import path from 'path'
+import { handle } from '../contracts/likey-contract.js'
 
-// const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
+const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
 
-// const state = {
-//     ...initState
-// }
+const state = {
+    ...initState
+}
 
-// let action
-// let res
+let action
+let res
 
+action = {
+    input: {
+        function: 'announceCreator',
+        data: {
+        /** 创作规模 */
+          scale: 'Personal',
+          /** 短链接 */
+          shortname: 'ayakaneko',
+          /** 自我介绍 */
+          intro: '🐈🐱🐱可爱猫咪',
+          /** 创作类型 */
+          category: 'writing',
+          /** PST 代币相关 */
+          ticker: {
+            name: 'Ayaka Neko Coin',
+            ticker: 'ANC',
+            contract: 'mGjKEbZnNXkxIXIJNkzMZi_jBADXC9QGlovd2fGmQas'
+          },
+          /** 售卖方案列表 */
+          items: []
+        }
+    },
+    caller: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0'
+}
+
+res = handle(state, action)
+console.log(res.state)
+
+action = {
+    input: {
+        function: 'announceCreator',
+        data: {
+        /** 创作规模 */
+          scale: 'Personal',
+          /** 短链接 */
+          shortname: 'littlesound',
+          /** 自我介绍 */
+          intro: '🐈🐱🐱可爱猫咪',
+          /** 创作类型 */
+          category: 'writing',
+          /** PST 代币相关 */
+          ticker: {
+            name: 'Ayaka Neko Coin',
+            ticker: 'ANC',
+            contract: 'mGjKEbZnNXkxIXIJNkzMZi_jBADXC9QGlovd2fGmQas'
+          },
+          /** 售卖方案列表 */
+          items: []
+        }
+    },
+    caller: 'RBuiQvzC6dI-ZMaeha4Y387grwOz73yp73OmqWgqtEQ'
+}
+
+res = handle(state, action)
+console.log(res.state)
+
+action = {
+    input: {
+        function: 'removeCreator',
+        target: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0'
+    },
+    caller: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0'
+}
+res = handle(state, action)
+
+action = {
+    input: {
+        function: 'removeCreator',
+        target: 'RBuiQvzC6dI-ZMaeha4Y387grwOz73yp73OmqWgqtEQ'
+    },
+    caller: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0'
+}
+res = handle(state, action)
+console.log(res.state)
 /**
  * isOwner 合约读取方法
  * 判断一个地址是不是合约拥有者   

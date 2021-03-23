@@ -63,7 +63,14 @@ const sponsorAddedInput = {
 const donationAddedInput = {
     function: 'donationAdded',
     data: {
-        statusId: "A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0"
+        statusId: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0'
+    }
+}
+
+const updateRatio = {
+    function: 'updateRatio',
+    data: {
+        ratio: '1:2'
     }
 }
 
@@ -74,7 +81,7 @@ const donationAddedInput = {
  * settings 对象必须是数组，元素也应该是数组
  */
 const editSettingsInput = {
-    function: "editSettings",
+    function: 'editSettings',
     data: {
         settings: []
     }
@@ -87,13 +94,13 @@ const editSettingsInput = {
  * attributes 对象必须是数组，元素必须是对象
  */
 const editAttributesInput = {
-    function: "editAttributes",
+    function: 'editAttributes',
     data: {
         attributes: [
-            { "communityLogo": "address" },
+            { 'communityLogo': 'address' },
             // 重复项目将会被舍弃
-            { "communityLogo": "address2" },
-            { "communityLogo2": "address2" }
+            { 'communityLogo': 'address2' },
+            { 'communityLogo2': 'address2' }
         ]
     }
 }

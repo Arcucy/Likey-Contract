@@ -1,6 +1,6 @@
 /**
  * Likey Contract
- * Version: 1.0.3
+ * Version: 1.0.4
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -150,7 +150,6 @@ class Utils {
 
 class Creator {
     static isCreator(creators, address) {
-        console.log(Object.keys(creators))
         return Object.keys(creators).indexOf(address) !== -1
     }
 
@@ -293,7 +292,7 @@ class Creator {
             data.items = items
         }
 
-        Object.defineProperty(state.creators, caller, {
+        Object.defineProperty(state.creators, String(caller), {
             value: data,
             writable: true,
             enumerable: true
