@@ -9,8 +9,6 @@
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
 
-const ContractError = Error
-
 class Ownable {
     /**
      * isOwner checks whether the address is the owner of this contract
