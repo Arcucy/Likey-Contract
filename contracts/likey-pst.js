@@ -1,6 +1,6 @@
 /**
  * Likey PST Contract
- * Version: 1.0.2
+ * Version: 1.0.3
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -176,10 +176,11 @@ class Ticker {
     }
 
     static _updateTotalSupply(state) {
-        let init = BigInt('0')
+        let init = new BigNumber('0')
         const balancesState = JSON.parse(JSON.stringify(state.balances))
         for (const i of Object.values(balancesState)) {
-            init = init + BigInt(i)
+            const temp = new BigNumber(i)
+            init = init.add(temp)
         }
 
         state.totalSupply = init.toString()
@@ -196,12 +197,14 @@ class Ticker {
         }
 
         try {
-            BigInt(String(quantity))
+            new BigNumber(String(quantity)).toFixed(12)
         } catch {
             throw new ContractError('_mint#: Input quantity invalid, should be number string')
         }
 
-        const finalValue = BigInt(balancesState[recipient]) + BigInt(quantity)
+        const qtyBig = new BigNumber(new BigNumber(quantity).toFixed(12))
+        const balanceBig = new BigNumber(balancesState[recipient])
+        const finalValue = balanceBig.add(qtyBig)
         balancesState[recipient] = finalValue.toString()
 
         state.balances = balancesState
@@ -214,18 +217,20 @@ class Ticker {
         }
 
         try {
-            BigInt(String(quantity))
+            new BigNumber(String(quantity)).toFixed(12)
         } catch {
             throw new ContractError('_burn#: Input quantity invalid, should be number string')
         }
 
-        if (BigInt(String(quantity) > BigInt(balancesState[target])) || BigInt(String(quantity)) === BigInt(balancesState[target])) {
+        const quantityBig = new BigNumber(new BigNumber(quantity).toFixed(12))
+        const balanceBig = new BigNumber(balancesState[target])
+        if (quantityBig.isGreaterThan(balanceBig) || quantityBig.isEqualTo(balancesState[target])) {
             delete balancesState[target]
             state.holders = String(Object.keys(balancesState).length)
             state.balances = balancesState
         }
         else {
-            const finalValue = BigInt(balancesState[target]) - BigInt(quantity)
+            const finalValue = balanceBig.minus(quantityBig)
             balancesState[target] = finalValue.toString()
             state.balances = balancesState
         }
