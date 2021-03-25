@@ -1,6 +1,6 @@
 /**
  * Likey PST Contract
- * Version: 1.0.1
+ * Version: 1.0.2
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -145,7 +145,7 @@ class Utils {
     }
 
     static ratioConversion(state) {
-        if (!/1:\d+\.\d+(?!\d+)/.test(state.ratio)) {
+        if (!/^1:\d*\.?\d*$/.test(state.ratio)) {
             throw new ContractError('sponsorAdded#: Ratio is invalid')
         }
         let original = 1
