@@ -1,6 +1,6 @@
 /**
  * Likey PST Contract
- * Version: 1.0.4
+ * Version: 1.0.5
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -180,7 +180,7 @@ class Ticker {
         const balancesState = JSON.parse(JSON.stringify(state.balances))
         for (const i of Object.values(balancesState)) {
             const temp = new BigNumber(i)
-            init = init.add(temp)
+            init = init.plus(temp)
         }
 
         state.totalSupply = init.toString()
@@ -238,17 +238,25 @@ class Ticker {
 
     static _transfer(state, sender, recipient, qty) {
         const balancesState = JSON.parse(JSON.stringify(state.balances))
+        const quantityBig = new BigNumber(new BigNumber(qty).toFixed(12))
+        
+        const senderBalanceBig = new BigNumber(balancesState[sender])
+        const sub = senderBalanceBig.minus(quantityBig)
+        balancesState[sender] = sub.toString()
+
+        if (balancesState[sender] === 'NaN') {
+            throw new ContractError(`transfer#: transfer failed due to errored balance`)
+        }
+
         if (!balancesState.hasOwnProperty(recipient)) {
             this._mint(state, recipient, qty)
             balancesState[recipient] = state.balances[recipient]
         }
         else {
-            const add = BigInt(balancesState[recipient]) + BigInt(String(qty))
+            const targetBalanceBig = new BigNumber(balancesState[target])
+            const add = targetBalanceBig.plus(quantityBig)
             balancesState[recipient] = add.toString()
         }
-
-        const sub = BigInt(balancesState[sender]) - BigInt(String(qty))
-        balancesState[sender] = sub.toString()
 
         state.balances = balancesState
     }
@@ -315,7 +323,11 @@ class Ticker {
         } catch (e) {
             throw new ContractError('transfer#: Sender(caller) input qty invalid, should be number string')
         }
-        if (balancesState[caller] === '0' || BigInt(balancesState[caller]) < BigInt(String(qty))) {
+
+        const callerBalanceBig = new BigNumber(balancesState[caller])
+        const quantity = new BigNumber(qty)
+
+        if (balancesState[caller] === '0' || callerBalanceBig.isLessThan(quantity)) {
             throw new ContractError('transfer#: Sender(caller) is insufficient fund')
         }
 

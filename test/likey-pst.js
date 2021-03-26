@@ -36,11 +36,11 @@ const burnInput = {
 /**
  * transfer 合约写入方法 
  * PST 转账，通用方法   
- * recipient 填写地址，qty 填写数量
+ * target 填写地址，qty 填写数量
  */
 const transferInput = {
     function: 'transfer',
-    recipient: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
+    target: 'A4LCIVue3lxOR1ua_P2zMs_0B9Evsaypk3iNjsft8m0',
     qty: '20'
 }
 
