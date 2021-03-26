@@ -3,7 +3,7 @@
     "ticker": "",
     "owner": "",
     "admins": [""],
-    "divisibility": 1000000000000,
+    "divisibility": 100000000000,
     "ratio": "1:1",
     "balances": {},
     "holders": "0",
@@ -11,5 +11,5 @@
     "donations": [],
     "attributes": [],
     "settings": [],
-    "version": "1.0.3"
+    "version": "1.0.4"
 }

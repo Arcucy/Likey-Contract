@@ -1,6 +1,6 @@
 /**
  * Likey PST Contract
- * Version: 1.0.3
+ * Version: 1.0.4
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -162,9 +162,9 @@ class Utils {
         }
 
         for (let i = 0; i < iteration; i++) {
-            original = BigInt(original) * BigInt('10')
+            original = new BigNumber(original).multipliedBy('10')
         }
-        conversion = BigInt(conversion)
+        conversion = new BigNumber(String(conversion))
         return { original, conversion }
     }
 }
@@ -204,7 +204,7 @@ class Ticker {
 
         const qtyBig = new BigNumber(new BigNumber(quantity).toFixed(12))
         const balanceBig = new BigNumber(balancesState[recipient])
-        const finalValue = balanceBig.add(qtyBig)
+        const finalValue = balanceBig.plus(qtyBig)
         balancesState[recipient] = finalValue.toString()
 
         state.balances = balancesState
@@ -337,7 +337,7 @@ class Ticker {
             throw new ContractError('sponsorAdded#: Sponsor failed because of transfering target is not the owner of this contract')
         }
         const ratio = Utils.ratioConversion(state)
-        const quantity = BigInt(SmartWeave.transaction.quantity) * ratio.original / ratio.conversion
+        const quantity = new BigNumber(SmartWeave.transaction.quantity).multipliedBy(ratio.original).div(ratio.conversion)
 
         this._mint(state, SmartWeave.transaction.owner, quantity)
         this._updateHolders(state)
