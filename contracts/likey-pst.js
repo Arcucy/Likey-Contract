@@ -149,7 +149,7 @@ class Utils {
             throw new ContractError('sponsorAdded#: Ratio is invalid')
         }
         let original = 1
-        let conversion = parseFloat(state.ratio.split(':').pop())
+        let conversion = parseFloat(parseFloat(state.ratio.split(':').pop()).toFixed(12))
         let iteration = 0
 
         while (true) {

@@ -201,3 +201,10 @@ const editItemInput = {
         ]
     }
 }
+
+const updateRatio = {
+    function: 'updateRatio',
+    data: {
+        ratio: '1:2'
+    }
+}

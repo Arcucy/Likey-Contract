@@ -1,6 +1,6 @@
 /**
  * Likey Contract
- * Version: 1.0.4
+ * Version: 1.0.5
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -8,6 +8,8 @@
  * Assosiated With: Project LIKEY
  * Source: https://github.com/AyakaLab/Growth-Contract
  */
+
+const ContractError = Error
 
 class Ownable {
     /**
@@ -199,7 +201,8 @@ class Creator {
         const exampleTikcer = {
             ticker: '',
             name: '',
-            contract: ''
+            contract: '',
+            ratio: ''
         }
 
         if (!Utils.compareKeys(exampleTikcer, data.ticker) || Object.keys(data.ticker) < 3) {
@@ -207,12 +210,19 @@ class Creator {
         }
 
         for (const [key, value] of Object.entries(data.ticker)) {
-            if (key === 'ticker' || key === 'name' || key === 'contract') {
+            if (key === 'ticker' || key === 'name' || key === 'contract' || key === 'ratio') {
                 if (typeof (value) !== 'string') {
                     throw new ContractError(`verifyData#: Invalid ticker key '${key}' with value '${value}', value should be string`)
                 }
             }
         }
+        const ratio = String(data.ticker.ratio).split(':').pop()
+        const ratioDecimals = ratio.split('.')
+        if (ratioDecimals.length === 2 && String(ratioDecimals[1]).length > 12) {
+            throw new ContractError(`verifyData#: Invalid ticker key ratio with value '${data.ticker.ratio}', decimals should be within 12`)
+        }
+
+        data.ticker.ratio = '1:' + ratio
 
         if (!Utils.isAddress(String(data.ticker.contract))) {
             throw new ContractError(`verifyData#: Contract is not a address`)
@@ -370,6 +380,21 @@ class Creator {
         creator.category = data.category
 
         state.creators[caller] = creator
+        return state
+    }
+
+    static updateRatio(state, caller, data) {
+        if (!(Admin.isAdmin(state.admins, caller) || Ownable.isOwner(state.owner, caller) || Creator.isCreator(state.creators, caller))) {
+            throw new ContractError('updateRatio#: Caller is not the creator of its own or admin/owner')
+        }
+
+        const ratio = String(data.ratio).split(':').pop()
+        const ratioDecimals = ratio.split('.')
+        if (ratioDecimals.length === 2 && String(ratioDecimals)[1].length > 12) {
+            throw new ContractError(`updateRatio#: Invalid ratio with value '${data.ratio}', decimals should be within 12`)
+        }
+
+        state.creators[caller].ticker.ratio = '1:' + parseFloat(parseFloat(ratio).toFixed(12))
         return state
     }
 
@@ -650,6 +675,15 @@ export function handle(state, action) {
      */
     if (input.function === 'editItem') {
         const res = Creator.editItem(state, caller, input.target, input.data)
+        return { state: res }
+    }
+
+    // updateRatio write_contract_function
+    /**
+     * @param {Object} data ratio data
+     */
+     if (input.function === 'updateRatio') {
+        const res = Creator.updateRatio(state, caller, input.data)
         return { state: res }
     }
 
