@@ -1,4 +1,4 @@
-<h1 align="center">Growth Contract</h1>
+<h1 align="center">Likey Contract</h1>
 <p align="center">SmartWeave Contract for Growth</p>
 
 
