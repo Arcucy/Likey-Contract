@@ -341,7 +341,7 @@ class Ticker {
      * sponsorAdded adds a sponsor along with coresponding value of pst according to its transaction quantity
      * @param {*} state         - contract state
      */
-    static sponsorAdded(state) {
+    static sponsorAdded(state, caller) {
         if (!(SmartWeave.transaction.target || SmartWeave.transaction.target === '')) {
             throw new ContractError('sponsorAdded#: Sponsor invalid because of transfering target not specified')
         }
@@ -351,7 +351,7 @@ class Ticker {
         const ratio = Utils.ratioConversion(state)
         const quantity = new BigNumber(SmartWeave.transaction.quantity).multipliedBy(ratio.original).div(ratio.conversion)
 
-        this._mint(state, SmartWeave.transaction.owner, quantity)
+        this._mint(state, caller, quantity)
         this._updateHolders(state)
         this._updateTotalSupply(state)
 
@@ -509,7 +509,7 @@ export function handle(state, action) {
      * @param {Object} data sponsor data
      */
     if (input.function === 'sponsorAdded') {
-        const res = Ticker.sponsorAdded(state)
+        const res = Ticker.sponsorAdded(state, caller)
         return { state: res }
     }
 
