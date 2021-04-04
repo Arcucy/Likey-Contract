@@ -1,6 +1,6 @@
 /**
  * Likey Contract
- * Version: 1.0.5
+ * Version: 1.1.0
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -142,6 +142,14 @@ class Utils {
      * @returns boolean
      */
     static compareKeys(a, b) {
+        if (typeof(a) !== 'object' || Object.keys(a).length === 0) {
+            throw new ContractError('compareKeys#: Input data A is not a valid object')
+        }
+
+        if (typeof(b) !== 'object' || Object.keys(b).length === 0) {
+            throw new ContractError('compareKeys#: Input data B is not a valid object')
+        }
+
         const aKeys = Object.keys(a).sort();
         const bKeys = Object.keys(b).sort();
         return JSON.stringify(aKeys) === JSON.stringify(bKeys);
@@ -151,6 +159,14 @@ class Utils {
 class Creator {
     static isCreator(creators, address) {
         return Object.keys(creators).indexOf(address) !== -1
+    }
+
+    static isPstContractExist(creators, address) {
+        const pstContracts = []
+        for (const item of Object.values(creators)) {
+            pstContracts.push(item.ticker.contract)
+        }
+        return pstContracts.indexOf(address) !== -1
     }
 
     static verifyData(state, data) {
@@ -224,6 +240,10 @@ class Creator {
 
         if (!Utils.isAddress(String(data.ticker.contract))) {
             throw new ContractError(`verifyData#: Contract is not a address`)
+        }
+
+        if (this.isPstContractExist(state.creators, data.ticker.contract)) {
+            throw new ContractError(`verifyData#: Contract is already exist`)
         }
     }
 
@@ -547,7 +567,121 @@ class Likey {
     }
 }
 
-export function handle(state, action) {
+class User {
+    static isUser(users, address) {
+        return Object.keys(users).indexOf(address) !== -1
+    }
+
+    static isPstContractExist(creators, address) {
+        const pstContracts = []
+        for (const item of Object.values(creators)) {
+            pstContracts.push(item.ticker.contract)
+        }
+        return pstContracts.indexOf(address) !== -1
+    }
+
+    static getPstContractOwner(creators, address) {
+        let owner = ''
+        for (const [key, value] of Object.entries(creators)) {
+            if (value.ticker.contract === address) {
+                owner = key
+            }
+        }
+
+        return owner
+    }
+
+    /**
+     * updateHoldingTicker will update holding ticker contract to caller address
+     * @param {*} state                     - contract state
+     * @param {*} caller                    - contract caller
+     * @param {*} contract                  - ticker contract
+     */
+    static async updateHoldingTicker(state, caller, contract) {
+        if (!Utils.isAddress(contract.address)) {
+            throw new ContractError('updateHoldingTicker#: Ticker contract is not a valid address')
+        }
+
+        const examplePstState = {
+            name: '',
+            ticker: '',
+            owner: '',
+            admins: [],
+            divisibility: 0,
+            ratio: '1:1',
+            balances: {},
+            holders: '0',
+            totalSupply: '0',
+            donations: [],
+            attributes: [],
+            settings: [],
+            version: '1.0.0'
+        }
+
+        let pstState
+        try {
+            pstState = await SmartWeave.contracts.readContractState(contract.address)
+        } catch (err) {
+            throw new ContractError('updateHoldingTicker#: Unable to read address, might not be a contract')
+        }
+        if (!Utils.compareKeys(examplePstState, pstState)) {
+            throw new ContractError('updateHoldingTicker#: Data input is invalid, keys does not match the schema')
+        }
+        if (Object.keys(state.creators).length === 0) {
+            throw new ContractError('updateHoldingTicker#: There is no creators')
+        }
+        if (!this.isPstContractExist(state.creators, contract.address)) {
+            throw new ContractError('updateHoldingTicker#: Contract address is not one of the known contract in state')
+        }
+
+        const owner = this.getPstContractOwner(state.creators, contract.address)
+        const balance = new BigNumber(pstState.balances[caller])
+
+        if (!pstState.balances[caller] || balance.toString() === 'NaN') {
+            throw new ContractError(`updateHoldingTicker#: User balance is invalid in contract address ${contract.address}`)
+        }
+
+        if (this.isUser(state.users, caller)) {
+            if (balance.isLessThanOrEqualTo(new BigNumber(0))) {
+                let currentHolding = state.users[caller]
+                currentHolding = currentHolding.filter(item => item.contract !== contract.address)
+                state.users[caller] = currentHolding
+            } else {
+                for (const item of state.users[caller]) {
+                    if (item.contract === contract.address) {
+                        throw new ContractError('updateHoldingTicker#: Already recorded caller\'s holding')
+                    }
+                }
+
+                const tickers = [...state.users[caller]]
+                const obj = {
+                    owner,
+                    contract: contract.address
+                }
+                tickers.push(obj)
+                state.users[caller] = tickers
+            }
+        } else {
+            if (balance.isLessThanOrEqualTo(new BigNumber(0))) {
+                throw new ContractError(`updateHoldingTicker#: Should not update holding due to insufficient funds balance with contract ${contract.address}`)
+            } else {
+                const obj = {
+                    owner,
+                    contract: contract.address
+                }
+                Object.defineProperty(state.users, String(caller), {
+                    value: [obj],
+                    writable: true,
+                    enumerable: true
+                })
+            }
+        }
+
+        return state
+    }
+}
+
+export async function handle(state, action) {
     const input = action.input
     const caller = action.caller
 
@@ -682,6 +816,15 @@ export function handle(state, action) {
      */
      if (input.function === 'updateRatio') {
         const res = Creator.updateRatio(state, caller, input.data)
+        return { state: res }
+    }
+
+    // updateHoldingTicker write_contract_function
+    /**
+     * @param {Object} data ticker contract data
+     */
+    if (input.function === 'updateHoldingTicker') {
+        const res = await User.updateHoldingTicker(state, caller, input.data)
         return { state: res }
     }
 

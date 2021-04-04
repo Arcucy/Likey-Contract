@@ -10,6 +10,7 @@
 
 // let action
 // let res
+
 /**
  * isOwner 合约读取方法
  * 判断一个地址是不是合约拥有者   
@@ -130,6 +131,7 @@ const announceCreatorInput = {
             name: 'Example Name',
             /** 代币合约地址 */
             contract: 'ADDRESS',
+            ratio: '1:1'
         },
         /** 售卖方案列表 */
         items: [
@@ -208,3 +210,11 @@ const updateRatio = {
         ratio: '1:2'
     }
 }
+
+const updateHoldingTicker = {
+    function: 'updateHoldingTicker',
+    data: {
+        address: 'Wvp7APAOzwz_ZGxFmvAiVTGhKB47DRvI2yFmOqHW0e8'
+    }
+}
+
