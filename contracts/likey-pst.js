@@ -1,6 +1,6 @@
 /**
  * Likey PST Contract
- * Version: 1.0.5
+ * Version: 1.1.0
  * 
  * Copyright ©️ Arcucy.io
  * 
@@ -474,6 +474,37 @@ export function handle(state, action) {
     const input = action.input
     const caller = action.caller
 
+    // Write
+    // addAdmin write_contract_function
+    /**
+     * @param {String} function addAdmin
+     * @param {String} target address
+     */
+     if (input.function === 'addAdmin') {
+        const res = Admin.addAdmin(state, caller, input.target)
+        return { state: res }
+    }
+
+    // removeAdmin write_contract_function
+    /**
+     * @param {String} function removeAdmin
+     * @param {String} target address
+     */
+    if (input.function === 'removeAdmin') {
+        const res = Admin.removeAdmin(state, caller, input.target)
+        return { state: res }
+    }
+
+    // transferOwnership write_contract_function
+    /**
+     * @param {String} function transferOwnership
+     * @param {String} target address
+     */
+    if (input.function === 'transferOwnership') {
+        const res = Ownable.transferOwnership(state, caller, input.target)
+        return { state: res }
+    }
+
     // mint write_contract_function
     /**
      * @param {String} recipient address
@@ -548,4 +579,6 @@ export function handle(state, action) {
         const res = LikeyPST.editAttributes(state, caller, input.data)
         return { state: res }
     }
+
+    throw new ContractError(`No function supplied or function not recognised: '${input.function}'`)
 }

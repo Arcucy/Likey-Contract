@@ -1,15 +1,21 @@
-// import fs, { stat } from 'fs'
-// import path from 'path'
-// import { handle } from '../contracts/likey-contract.js'
+import fs, { stat } from 'fs'
+import path from 'path'
+import { handle } from '../contracts/likey-contract.js'
 
-// const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
+const initState = JSON.parse(Buffer.from(fs.readFileSync(path.resolve('./contracts/likey-initial.json'))).toString('utf-8'))
 
-// const state = {
-//     ...initState
-// }
+const state = {
+    ...initState
+}
 
-// let action
-// let res
+let action = {
+    input: {
+        function: ''
+    }
+}
+let res
+
+handle(state, action)
 
 /**
  * isOwner 合约读取方法

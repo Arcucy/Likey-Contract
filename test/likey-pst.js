@@ -12,6 +12,26 @@
 // let res
 
 /**
+ * addAdmin 合约写入方法 
+ * 添加一个地址为管理员，该操作只有合约拥有者有权限完成   
+ * target 填写地址
+ */
+const addAdminInput = {
+    function: 'addAdmin',
+    target: 'ADDR'
+}
+
+/**
+ * removeAdmin 合约写入方法 
+ * 从管理员列表溢出一个管理员，该操作只有合约拥有者有权限完成   
+ * target 填写地址
+ */
+const removeAdminInput = {
+    function: 'removeAdmin',
+    target: 'ADDR'
+}
+
+/**
  * mint 合约写入方法 
  * 为指定地址铸币   
  * target 填写地址，quantity 填写数量

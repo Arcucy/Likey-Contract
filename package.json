@@ -14,6 +14,6 @@
     "eslint": "^7.21.0"
   },
   "scripts": {
-    "sdk": "node sdk.js" 
+    "sdk": "node sdk.js"
   }
 }
